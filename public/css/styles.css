@@ -22,9 +22,9 @@ div#frame {
   display: block;
 }
 
-.boards {
+div.boards {
   position: relative;
-  margin: 20px 20px;
+  margin: 5px;
   display: inline-block;
   /*float: left;*/
 }
@@ -38,16 +38,14 @@ div#0 {
   cursor: not-allowed;
 }
 
-.scores {
-  font-size: 2em;
+.statuses {
+  font-size: 1.5em;
   /* 40px/16=2.5em */
-  margin: 10px 0px;
 }
 
 .rules {
-  font-size: 1.5em;
+  font-size: 2em;
   display: block;
-  margin: 20px 10px;
 }
 
 span.emphasized {
