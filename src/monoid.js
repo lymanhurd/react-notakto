@@ -36,10 +36,11 @@ function findMonoidProduct(coeffs) {
 }
 
 /**
- * multiply(m12, m2) - Multiply two Mondoid coefficients using the fact that the operation is commutative
+ * multiply(m1, m2) - Multiply two Mondoid coefficients using the fact that the operation is commutative
  * 
  * @param {number}} m1 
- * @param {number} m2 
+ * @param {number} m2
+ * 
  * @returns {number}
  */
 function multiply(m1, m2) {

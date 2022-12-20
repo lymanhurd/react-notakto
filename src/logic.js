@@ -2,7 +2,7 @@ import { isWinning } from './monoid';
 
 /**
  * computerMove(boards) - given the current position represented as an array of strings,
- * return a new position wit the computer's move
+ * return a new position with the computer's move
  * 
  * 
  * @param {Array<string>} boards
@@ -24,6 +24,8 @@ export function computerMove(boards) {
         const sqNum = square % 9;
         if (boards[idx][sqNum] === '-') {
             const test = mkMove(boards, idx, sqNum, "x");
+            // a possible improvement would be to try not to kill off any boards when making moves
+            // at random to proloing the game and give the human a chance to make mistakes
             if (findAvailable) {
                 return [test, false];
             }
@@ -39,8 +41,10 @@ export function computerMove(boards) {
 }
 
 /**
+ * isDead(board) - returns "true" if the board is dead, i.e., X has won by a three-in-a-row horizontally,
+ * vertically or diagonally
  * 
- * @param {Array<string>} board
+ * @param {string} board
  * 
  * @returns {boolean}
  */
@@ -65,8 +69,9 @@ export function isDead(board) {
 }
 
 /**
+ * isStart(boards) - returns true if all the boards ar ein their initial state (i.e., empty)
  * 
- * @param {Array<string>} board
+ * @param {Array<string>} boards
  * 
  * @returns {boolean}
  */
@@ -75,6 +80,7 @@ export function isStart(boards) {
 }
 
 /**
+ * isGameOver(boards) - returns true if every board is dead
  * 
  * @param {Array<string>} boards
  * 
@@ -85,6 +91,10 @@ export function isGameOver(boards) {
 }
 
 /**
+ * humanMove(boards, idx, squareNum) - make a move on a specific board at a specific square and return the boards
+ * with the indicated square marked
+ * 
+ * However, if the attempted move is illegale because the square is already occupied or the board is dead, return null
  * 
  * @param {Array<string>} boards 
  * @param {number} idx 
@@ -100,6 +110,10 @@ export function humanMove(boards, idx, squareNum) {
 }
 
 /**
+ * mkMove(boards, idx, squareNum, symbol) - create new copy of the board position with this new value
+ * added
+ * 
+ * This is a pure function, returning a modified copy
  * 
  * @param {Array<string>} boards 
  * @param {number} idx 
