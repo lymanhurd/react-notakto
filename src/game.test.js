@@ -1,5 +1,5 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';
 
 let container = null
@@ -17,7 +17,7 @@ afterEach(() => {
   container = null
 })
 
-import Game from './index';
+import Game from './game';
 
 describe('Game', () => {
   it('renders Game component', () => {

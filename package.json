@@ -36,5 +36,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "canvas": "^2.10.2",
+    "jest-canvas-mock": "^2.4.0"
   }
 }
