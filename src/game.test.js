@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';
+import Game from './game';
 
 let container = null
 beforeEach(() => {
@@ -16,8 +17,6 @@ afterEach(() => {
   container.remove()
   container = null
 })
-
-import Game from './game';
 
 describe('Game', () => {
   it('renders Game component', () => {

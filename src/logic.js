@@ -10,34 +10,34 @@ import { isWinning } from './monoid';
  * @returns {Array<string>}
  */
 export function computerMove(boards) {
-    const numSquares = 9 * boards.length;
-    const startingSquare = Math.floor(Math.random() * numSquares);
-    // If the human player is winning, there is no "winning" move for the
-    // computer and it should return a random legal move.
-    const findAvailable = isWinning(boards);
-    for (let i = 0; i < numSquares; i++) {
-        const square = (i + startingSquare) % numSquares;
-        const idx = Math.floor(square / 9);
-        if (isDead(boards[idx])) {
-            continue;
-        }
-        const sqNum = square % 9;
-        if (boards[idx][sqNum] === '-') {
-            const test = mkMove(boards, idx, sqNum, "x");
-            // a possible improvement would be to try not to kill off any boards when making moves
-            // at random to proloing the game and give the human a chance to make mistakes
-            if (findAvailable) {
-                return [test, false];
-            }
-            if (isWinning(test)) {
-                return [test, true];
-            }
-        }
+  const numSquares = 9 * boards.length;
+  const startingSquare = Math.floor(Math.random() * numSquares);
+  // If the human player is winning, there is no "winning" move for the
+  // computer and it should return a random legal move.
+  const findAvailable = isWinning(boards);
+  for (let i = 0; i < numSquares; i++) {
+    const square = (i + startingSquare) % numSquares;
+    const idx = Math.floor(square / 9);
+    if (isDead(boards[idx])) {
+      continue;
     }
-    // Getting here means that there were no open spaces which should have been caught earlier, or
-    // that the game has evaluated to a win for the computer but we cannot find a "winning" move which
-    // should be mathematically impossible
-    console.log("Monoid Error: This should not be possible.");
+    const sqNum = square % 9;
+    if (boards[idx][sqNum] === '-') {
+      const test = mkMove(boards, idx, sqNum, "x");
+      // a possible improvement would be to try not to kill off any boards when making moves
+      // at random to proloing the game and give the human a chance to make mistakes
+      if (findAvailable) {
+        return [test, false];
+      }
+      if (isWinning(test)) {
+        return [test, true];
+      }
+    }
+  }
+  // Getting here means that there were no open spaces which should have been caught earlier, or
+  // that the game has evaluated to a win for the computer but we cannot find a "winning" move which
+  // should be mathematically impossible
+  console.log("Monoid Error: This should not be possible.");
 }
 
 /**
@@ -49,23 +49,23 @@ export function computerMove(boards) {
  * @returns {boolean}
  */
 export function isDead(board) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let line of lines) {
-      const [a, b, c] = line;
-      if ((board.charAt(a) !== "-") && (board.charAt(b) !== "-") && (board.charAt(c) !== "-")) {
-        return true;
-      }
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+  for (let line of lines) {
+    const [a, b, c] = line;
+    if ((board.charAt(a) !== "-") && (board.charAt(b) !== "-") && (board.charAt(c) !== "-")) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 /**
@@ -76,7 +76,7 @@ export function isDead(board) {
  * @returns {boolean}
  */
 export function isStart(boards) {
-    return boards.every((b) =>b === "---------");
+  return boards.every((b) =>b === "---------");
 }
 
 /**
@@ -87,7 +87,7 @@ export function isStart(boards) {
  * @returns {boolean}
  */
 export function isGameOver(boards) {
-    return boards.every((b) =>isDead(b));
+  return boards.every((b) =>isDead(b));
 }
 
 /**
@@ -103,10 +103,10 @@ export function isGameOver(boards) {
  * @returns {Array<string>?}
  */
 export function humanMove(boards, idx, squareNum) {
-    if ((boards[idx][squareNum] !== '-') || (isDead(boards[idx]))) {
-        return null;
-    }
-    return mkMove(boards, idx, squareNum, "X");
+  if ((boards[idx][squareNum] !== '-') || (isDead(boards[idx]))) {
+    return null;
+  }
+  return mkMove(boards, idx, squareNum, "X");
 }
 
 /**
@@ -123,7 +123,7 @@ export function humanMove(boards, idx, squareNum) {
  * @returns {Array<string>}
  */
 function mkMove(boards, idx, squareNum, symbol) {
-    let newBoards = boards.slice();
-    newBoards[idx] = boards[idx].substring(0, squareNum) + symbol + boards[idx].substring(squareNum + 1);
-    return newBoards;
+  let newBoards = boards.slice();
+  newBoards[idx] = boards[idx].substring(0, squareNum) + symbol + boards[idx].substring(squareNum + 1);
+  return newBoards;
 }

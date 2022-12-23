@@ -66,7 +66,7 @@ function Board(props) {
 }
 
 /**
- * Scoreds(props) - Reacxt component displaying the number of wins in this session by the computer
+ * Scores(props) - React component displaying the number of wins in this session by the computer
  * and the human
  */
 function Scores(props) {
