@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
-import Alert from 'react-bootstrap/Alert';
 
 import { computerMove, isDead, isStart, humanMove, isGameOver } from './logic';
+import { isWinning } from './monoid';
 
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -19,8 +19,8 @@ import './index.css';
  */
 function StartButton(props) {
   return (<Button variant={props.variant} size="lg" onClick={props.onClick}>
-      {props.startLabel}
-      </Button>);
+    {props.startLabel}
+    </Button>);
 }
 
 /**
@@ -29,8 +29,8 @@ function StartButton(props) {
  */
 function MinusButton(props) {
   return (<Button variant="outline-primary" size="lg" onClick={props.onClick}>
-      -
-      </Button>);  
+    -
+    </Button>);  
 }
 
 /**
@@ -39,8 +39,8 @@ function MinusButton(props) {
  */
 function PlusButton(props) {
   return (<Button variant="outline-primary" size="lg" onClick={props.onClick}>
-      +
-      </Button>);
+    +
+    </Button>);
 }
 
 /**
@@ -53,16 +53,16 @@ function Board(props) {
     drawBoard(canvasRef.current);
     props.contents.split("").forEach((elt, idx) => {
       if (elt === "X") {
-        drawX(canvasRef.current, idx, "red");
-      } else if (elt === 'x') {
         drawX(canvasRef.current, idx, "blue");
+      } else if (elt === 'x') {
+        drawX(canvasRef.current, idx, "red");
       }
     });
   }, [props.contents]);
     
   return (<canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} {...props}>
-            Your browser does not support HTML5.
-          </canvas>);
+      Your browser does not support HTML5.
+    </canvas>);
 }
 
 /**
@@ -71,10 +71,10 @@ function Board(props) {
  */
 function Scores(props) {
   return (
-    <div>
+    <span>
       <span className={"scores"}>Human: {props.humanWins} </span>
       <span className={"scores"}>Computer: {props.computerWins}</span>
-    </div>);
+    </span>);
 }
 
 /**
@@ -132,13 +132,12 @@ export default class Game extends React.Component {
 
   // Hitting "start" means that the human is passing and letting the computer move first
   startClickHandler() {
-    const [newBoards, winning] = computerMove(this.state.boards);
+    const newBoards = computerMove(this.state.boards);
     this.setState({
       boards: newBoards,
       stats: {
         humanWins: this.state.stats.humanWins,
         computerWins: this.state.stats.computerWins,
-        winning: winning,        
       }
     });
   }
@@ -159,8 +158,6 @@ export default class Game extends React.Component {
       stats: {
         humanWins: this.state.stats.humanWins,
         computerWins: computerWins,
-        winning: false,
-        gameOver: false,
       }
     });
   }
@@ -183,21 +180,17 @@ export default class Game extends React.Component {
         stats: {
           humanWins: this.state.stats.humanWins,
           computerWins: 1 + this.state.stats.computerWins,
-          gameOver: true,
         }
       });
       return;
     }
-    let winning;
-    [newBoards, winning] = computerMove(newBoards);
+    newBoards = computerMove(newBoards);
     if (isGameOver(newBoards)) {
       this.setState({
         boards: newBoards,
         stats: {
           humanWins: 1 + this.state.stats.humanWins,
           computerWins: this.state.stats.computerWins,
-          gameOver: true,
-          winning: winning,
         }
       });
       return;
@@ -207,54 +200,49 @@ export default class Game extends React.Component {
       stats: {
         humanWins: this.state.stats.humanWins,
         computerWins: this.state.stats.computerWins,
-        gameOver: false,
-        winning: winning,
       }      
     });
 
   }
 
   render() {
-    const alert = this.state.error ?
-      <Alert variant="danger">{this.state.error.message}</Alert> : null;
     const boardCanvases = this.state.boards.map((elt, idx) => isDead(this.state.boards[idx]) ? 
-        <Board key={idx} contents={elt} className={"boards dead"} />
-      :
+        <Board key={idx} contents={elt} className={"boards dead"} /> :
         <Board key={idx} contents={elt} className={"boards"} onClick={(event) => this.bdClickHandler(event, idx)}/>
       );
-    const buttonLabel = this.state.stats.gameOver ? "Play Again" :  "Quit";
-    const buttonVariant = (this.state.stats.winning && ! this.state.stats.gameOver) ? "outline-danger" : "outline-primary";
+    const buttonLabel = isGameOver(this.state.boards) ? "Play Again" :  "Quit";
+    const buttonVariant = (isWinning(this.state.boards) && ! isGameOver(this.state.boards)) ? "outline-danger" : "outline-primary";
     const buttons = (isStart(this.state.boards) ? 
       <div>
         <StartButton startLabel={"Start"} onClick={() => this.startClickHandler()} variant="outline-primary"/>
         <PlusButton onClick={() => this.plusClickHandler()} />
         <MinusButton onClick={() => this.minusClickHandler()} />
-      </div>
-      :
+      </div> :
       <div>
         <StartButton startLabel={buttonLabel} variant={buttonVariant} onClick={() => this.quitClickHandler()}/>
       </div>);
     return (
-        <div>
-          {alert}
-          <div className="game-board">
-            <a href="http://www.hurd-sullivan.com/"><img id="hslogo" src="images/HS.gif" alt="Go to Hurd-Sullivan.com"/></a>
-            {buttons}
-            <Scores humanWins={this.state.stats.humanWins} computerWins={this.state.stats.computerWins}/>
-            <div>
-              {boardCanvases}
-            </div>
-          </div>
-          <div id="explanation">
-            <ul className="rules">
-              <li>Red and Blue take turns playing X's</li>
-              <li>A board with three X's in a row (irrespective of color) is dead</li>
-              <li>Whoever kills the last board, loses</li>
-              <li>Press "Start" to make the computer move first, or click on a square</li>
-              <li><a href="./discussion.html">More discussion</a></li>
-            </ul>
+      <div>
+        <div className="gameHeader">
+          <Scores humanWins={this.state.stats.humanWins} computerWins={this.state.stats.computerWins}/>
+          <a href="http://www.hurd-sullivan.com/"><img id="hslogo" src="images/HS.gif" alt="Go to Hurd-Sullivan.com"/></a>
+        </div>
+        <div className="game-board">
+          {buttons}
+          <div>
+            {boardCanvases}
           </div>
         </div>
+        <div id="explanation">
+          <ul className="rules">
+            <li>Players take turns both playing X's</li>
+            <li>A board with three X's in a row (irrespective of color) is dead</li>
+            <li>Whoever kills the last board, loses</li>
+            <li>Press "Start" to make the computer move first, or click on a square</li>
+            <li><a href="./discussion.html">More discussion</a></li>
+          </ul>
+        </div>
+      </div>
     );    
   }
 }

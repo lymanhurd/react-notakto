@@ -19,18 +19,15 @@ export function computerMove(boards) {
     const square = (i + startingSquare) % numSquares;
     const idx = Math.floor(square / 9);
     if (isDead(boards[idx])) {
-      continue;
+        continue;
     }
     const sqNum = square % 9;
     if (boards[idx][sqNum] === '-') {
-      const test = mkMove(boards, idx, sqNum, "x");
+      const test = mkMove(boards, idx, sqNum);
       // a possible improvement would be to try not to kill off any boards when making moves
       // at random to proloing the game and give the human a chance to make mistakes
-      if (findAvailable) {
-        return [test, false];
-      }
-      if (isWinning(test)) {
-        return [test, true];
+      if (findAvailable|| isWinning(test)) {
+          return test;
       }
     }
   }
@@ -106,11 +103,11 @@ export function humanMove(boards, idx, squareNum) {
   if ((boards[idx][squareNum] !== '-') || (isDead(boards[idx]))) {
     return null;
   }
-  return mkMove(boards, idx, squareNum, "X");
+  return mkMove(boards, idx, squareNum);
 }
 
 /**
- * mkMove(boards, idx, squareNum, symbol) - create new copy of the board position with this new value
+ * mkMove(boards, idx, squareNum) - create new copy of the board position with this new value
  * added
  * 
  * This is a pure function, returning a modified copy
@@ -118,12 +115,10 @@ export function humanMove(boards, idx, squareNum) {
  * @param {Array<string>} boards 
  * @param {number} idx 
  * @param {number} squareNum 
- * @param {string} symbol
  * 
  * @returns {Array<string>}
  */
-function mkMove(boards, idx, squareNum, symbol) {
-  let newBoards = boards.slice();
-  newBoards[idx] = boards[idx].substring(0, squareNum) + symbol + boards[idx].substring(squareNum + 1);
-  return newBoards;
+function mkMove(boards, idx, squareNum) {
+  return boards.map((b, i) => i === idx ?
+    b.substring(0, squareNum).toUpperCase() + "x" + b.substring(squareNum + 1).toUpperCase() : b.toUpperCase());
 }
