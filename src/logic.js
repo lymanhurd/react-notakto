@@ -10,34 +10,31 @@ import { isWinning } from './monoid';
  * @returns {Array<string>}
  */
 export function computerMove(boards) {
-    const numSquares = 9 * boards.length;
-    const startingSquare = Math.floor(Math.random() * numSquares);
-    // If the human player is winning, there is no "winning" move for the
-    // computer and it should return a random legal move.
-    const findAvailable = isWinning(boards);
-    for (let i = 0; i < numSquares; i++) {
-        const square = (i + startingSquare) % numSquares;
-        const idx = Math.floor(square / 9);
-        if (isDead(boards[idx])) {
-            continue;
-        }
-        const sqNum = square % 9;
-        if (boards[idx][sqNum] === '-') {
-            const test = mkMove(boards, idx, sqNum, "x");
-            // a possible improvement would be to try not to kill off any boards when making moves
-            // at random to proloing the game and give the human a chance to make mistakes
-            if (findAvailable) {
-                return [test, false];
-            }
-            if (isWinning(test)) {
-                return [test, true];
-            }
-        }
+  const numSquares = 9 * boards.length;
+  const startingSquare = Math.floor(Math.random() * numSquares);
+  // If the human player is winning, there is no "winning" move for the
+  // computer and it should return a random legal move.
+  const findAvailable = isWinning(boards);
+  for (let i = 0; i < numSquares; i++) {
+    const square = (i + startingSquare) % numSquares;
+    const idx = Math.floor(square / 9);
+    if (isDead(boards[idx])) {
+        continue;
     }
-    // Getting here means that there were no open spaces which should have been caught earlier, or
-    // that the game has evaluated to a win for the computer but we cannot find a "winning" move which
-    // should be mathematically impossible
-    console.log("Monoid Error: This should not be possible.");
+    const sqNum = square % 9;
+    if (boards[idx][sqNum] === '-') {
+      const test = mkMove(boards, idx, sqNum);
+      // a possible improvement would be to try not to kill off any boards when making moves
+      // at random to proloing the game and give the human a chance to make mistakes
+      if (findAvailable|| isWinning(test)) {
+          return test;
+      }
+    }
+  }
+  // Getting here means that there were no open spaces which should have been caught earlier, or
+  // that the game has evaluated to a win for the computer but we cannot find a "winning" move which
+  // should be mathematically impossible
+  console.log("Monoid Error: This should not be possible.");
 }
 
 /**
@@ -103,14 +100,14 @@ export function isGameOver(boards) {
  * @returns {Array<string>?}
  */
 export function humanMove(boards, idx, squareNum) {
-    if ((boards[idx][squareNum] !== '-') || (isDead(boards[idx]))) {
-        return null;
-    }
-    return mkMove(boards, idx, squareNum, "X");
+  if ((boards[idx][squareNum] !== '-') || (isDead(boards[idx]))) {
+    return null;
+  }
+  return mkMove(boards, idx, squareNum);
 }
 
 /**
- * mkMove(boards, idx, squareNum, symbol) - create new copy of the board position with this new value
+ * mkMove(boards, idx, squareNum) - create new copy of the board position with this new value
  * added
  * 
  * This is a pure function, returning a modified copy
@@ -118,12 +115,10 @@ export function humanMove(boards, idx, squareNum) {
  * @param {Array<string>} boards 
  * @param {number} idx 
  * @param {number} squareNum 
- * @param {string} symbol
  * 
  * @returns {Array<string>}
  */
-function mkMove(boards, idx, squareNum, symbol) {
-    let newBoards = boards.slice();
-    newBoards[idx] = boards[idx].substring(0, squareNum) + symbol + boards[idx].substring(squareNum + 1);
-    return newBoards;
+function mkMove(boards, idx, squareNum) {
+  return boards.map((b, i) => i === idx ?
+    b.substring(0, squareNum).toUpperCase() + "x" + b.substring(squareNum + 1).toUpperCase() : b.toUpperCase());
 }
