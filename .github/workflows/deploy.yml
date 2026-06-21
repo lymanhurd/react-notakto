@@ -2,7 +2,7 @@ name: Deploy Vite App to Hostinger
 
 on:
   push:
-    branches: [ "main" ]   # or "development" if that's your deploy branch
+    branches: [ "development" ]   # or "development" if that's your deploy branch
 
 jobs:
   build-and-deploy:
