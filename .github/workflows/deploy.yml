@@ -1,8 +1,8 @@
-name: Deploy React App to Hostinger
+name: Deploy Vite App to Hostinger
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "development" ]   # or "development" if that's your deploy branch
 
 jobs:
   build-and-deploy:
@@ -12,10 +12,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
+      - name: Build Vite app
         run: npm run build
 
       - name: Deploy via FTP
@@ -24,5 +29,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: build
+          local-dir: dist
           server-dir: /public_html
