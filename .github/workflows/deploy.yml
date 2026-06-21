@@ -2,7 +2,10 @@ name: Deploy Vite App to Hostinger
 
 on:
   push:
-    branches: [ "development" ]   # or "development" if that's your deploy branch
+    branches:
+      - main
+      - develop
+      - vite-update
 
 jobs:
   build-and-deploy:
@@ -10,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
