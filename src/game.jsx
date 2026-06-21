@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
+import { Button } from "react-bootstrap";
 
 import { computerMove, isDead, isStart, humanMove, isGameOver } from './logic';
 import { isWinning } from './monoid';
