@@ -35,3 +35,4 @@ jobs:
           REMOTE_HOST: ${{ secrets.FTP_SERVER }}
           REMOTE_USER: ${{ secrets.FTP_USERNAME }}
           TARGET: /home/${{ secrets.FTP_USERNAME }}/public_html/
+          REMOTE_PORT: 65002
