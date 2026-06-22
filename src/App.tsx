@@ -1,5 +1,4 @@
-import React from 'react'
-import Game from './game.jsx'   // or './game.js' if you haven't renamed yet
+import Game from './Game.js'
 
 export default function App() {
   return (
