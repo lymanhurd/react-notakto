@@ -1,4 +1,4 @@
-import Game from './Game.tsx'
+import Game from './Game'
 import version from "./version.json";
 
 export default function App() {
