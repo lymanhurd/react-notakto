@@ -1,6 +1,8 @@
 import Game from './Game'
 import version from "./version.json";
 
+console.log("Build info:", version);
+
 export default function App() {
   return (
     <div className="app-container">
