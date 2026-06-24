@@ -12,14 +12,20 @@ const App = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('Fetching /version.json...');
+    
     fetch('/version.json')
       .then(response => {
+        console.log('Fetch response status:', response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
-      .then(data => setVersion(data))
+      .then(data => {
+        console.log('Version data loaded:', data);
+        setVersion(data);
+      })
       .catch(err => {
         console.error('Failed to load version:', err);
         setError('Version info unavailable');
