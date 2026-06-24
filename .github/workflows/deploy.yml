@@ -29,26 +29,37 @@ jobs:
       - name: Build Vite app
         run: npm run build
 
-      - name: ✅ Verify version.json exists
+      - name: ✅ Verify version.json exists locally
         run: |
           echo "Checking dist directory contents:"
-          ls -la dist/
+          ls -lah dist/
           echo ""
           echo "version.json content:"
           cat dist/version.json
 
-      - name: 📂 Sync files
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc --delete"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.FTP_SERVER }}
-          REMOTE_USER: ${{ secrets.FTP_USERNAME }}
-          TARGET: /home/${{ secrets.FTP_USERNAME }}/public_html/
-          REMOTE_PORT: 65002
-          SCRIPT_BEFORE: |
-            mkdir -p /home/${{ secrets.FTP_USERNAME }}/public_html/
-          SCRIPT_AFTER: |
-            chmod -R 755 /home/${{ secrets.FTP_USERNAME }}/public_html/
-            ls -la /home/${{ secrets.FTP_USERNAME }}/public_html/ | head -20
+      - name: 🔑 Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 65002 ${{ secrets.FTP_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: 📂 Deploy with rsync
+        run: |
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key -p 65002 -o ConnectTimeout=10" \
+            --delete \
+            --exclude='.git' \
+            dist/ \
+            ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }}:/home/${{ secrets.FTP_USERNAME }}/public_html/
+          
+          echo "✅ Rsync complete!"
+
+      - name: ✅ Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -p 65002 ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }} \
+            "echo '--- Files in public_html ---' && \
+             ls -lah /home/${{ secrets.FTP_USERNAME }}/public_html/ && \
+             echo '' && \
+             echo '--- version.json content ---' && \
+             cat /home/${{ secrets.FTP_USERNAME }}/public_html/version.json"
