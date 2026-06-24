@@ -25,6 +25,3 @@ dist-ssr
 
 # TypeScript build info
 *.tsbuildinfo
-
-# Generated version file
-src/version.json
