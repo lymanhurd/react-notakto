@@ -1,4 +1,3 @@
-// scripts/write-version.js
 import { writeFileSync } from "fs";
 import { execSync } from "child_process";
 
@@ -16,5 +15,6 @@ const version = {
   timestamp: new Date().toISOString()
 };
 
-writeFileSync("src/version.json", JSON.stringify(version, null, 2));
-console.log("✔ Wrote src/version.json:", version);
+// Write to public directory so it's available at build time
+writeFileSync("public/version.json", JSON.stringify(version, null, 2));
+console.log("✔ Wrote public/version.json:", version);
