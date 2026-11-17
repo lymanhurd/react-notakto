@@ -1,54 +1,14 @@
-import { useEffect, useState } from 'react';
 import Game from './Game';
+import SiteFooter from './shared/SiteFooter';
 
-interface Version {
-  build: string;
-  commit: string;
-  timestamp: string;
-}
+const App = () => (
+  <div className="page">
+    <a className="back-link" href="/">← Lyman's Logic Games</a>
 
-const App = () => {
-  const [version, setVersion] = useState<Version | null>(null);
-  const [error, setError] = useState<string | null>(null);
+    <Game />
 
-  useEffect(() => {
-    console.log('Fetching /version.json...');
-    
-    fetch('/version.json')
-      .then(response => {
-        console.log('Fetch response status:', response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Version data loaded:', data);
-        setVersion(data);
-      })
-      .catch(err => {
-        console.error('Failed to load version:', err);
-        setError('Version info unavailable');
-      });
-  }, []);
-
-  return (
-    <div className="app-container">
-      <Game />
-
-      <div style={{ marginTop: "1rem", opacity: 0.6, fontSize: "0.8rem" }}>
-        {error ? (
-          <span>{error}</span>
-        ) : version ? (
-          <span>
-            Build {version.build} • {version.commit.slice(0, 7)}
-          </span>
-        ) : (
-          <span>Loading build info...</span>
-        )}
-      </div>
-    </div>
-  );
-};
+    <SiteFooter />
+  </div>
+);
 
 export default App;

@@ -1,0 +1,120 @@
+/*
+ * Shared design tokens for Lyman's Logic Games.
+ * "Puzzle book" palette: warm paper, deep ink, one ink-blue accent,
+ * and a vermilion highlight reserved for the most recent move.
+ * Every page imports this file; dark mode follows the OS setting.
+ */
+:root {
+  color-scheme: light dark;
+
+  --bg: #f6f2e7;          /* paper */
+  --surface: #fffdf7;     /* cards, boards */
+  --ink: #1d2433;         /* body text */
+  --muted: #5f6676;       /* secondary text */
+  --border: #e2dac6;      /* hairlines, card borders */
+  --shadow: 0 1px 2px rgba(29, 36, 51, 0.06), 0 4px 14px rgba(29, 36, 51, 0.07);
+  --shadow-lift: 0 2px 4px rgba(29, 36, 51, 0.08), 0 10px 24px rgba(29, 36, 51, 0.12);
+
+  --accent: #2b4c9b;      /* ink blue: links, buttons, focus */
+  --accent-strong: #1f3a7a;
+  --accent-soft: #e5ebf7;
+  --on-accent: #ffffff;
+
+  --grid: #3a4152;        /* board lines */
+  --mark: #2b4c9b;        /* X marks */
+  --last: #d9480f;        /* most recent move / warning */
+  --last-soft: #fde8dd;
+
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171f;
+    --surface: #1d2130;
+    --ink: #e9e6dd;
+    --muted: #a3a8b5;
+    --border: #2f3546;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 24px rgba(0, 0, 0, 0.35);
+
+    --accent: #93b1ff;
+    --accent-strong: #b7cbff;
+    --accent-soft: #232c45;
+    --on-accent: #10131b;
+
+    --grid: #c9ccd6;
+    --mark: #93b1ff;
+    --last: #ff8a5c;
+    --last-soft: #3a2420;
+  }
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--accent-strong);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.site-footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.site-footer img {
+  width: 72px;
+  opacity: 0.85;
+}
+
+/* The HS logo is black-on-transparent; invert it so it shows on dark paper. */
+@media (prefers-color-scheme: dark) {
+  .site-footer img {
+    filter: invert(1);
+  }
+}

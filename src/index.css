@@ -1,60 +1,306 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* NoTakTo page styles. Colors come from src/shared/theme.css. */
+
+/* Bootstrap sets its own body colors; point them at the shared theme. */
+:root {
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--ink);
+  --bs-body-font-family: var(--font-body);
 }
 
-img#hslogo {
-  float: right;
-  margin: 8px;
-  width: 85px;
+/* Bootstrap's link color is fixed; use the theme accent (which also adapts to dark mode). */
+.page a {
+  color: var(--accent);
 }
 
-body {
-  background: khaki;
-  margin: 15px;
+.page a:hover {
+  color: var(--accent-strong);
 }
 
-div#frame {
-  display: block;
-}
-
-.boards {
-  position: relative;
-  margin: 20px 20px;
+.back-link {
   display: inline-block;
-  /*float: left;*/
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  text-decoration: none;
 }
 
-div#b0 {
-  float: left;
+.back-link:hover {
+  text-decoration: underline;
 }
 
-.disabled {
-  opacity: 0.8;
+/* ---- Header & scoreboard ---------------------------- */
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-bottom: 16px;
+}
+
+.game-header h1 {
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  margin: 0;
+}
+
+.scoreboard {
+  display: flex;
+  gap: 10px;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 96px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.score-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.score-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Controls --------------------------------------- */
+
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.board-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-count-value {
+  min-width: 5.5em;
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Re-skin Bootstrap's outline buttons with the theme accent. */
+.game .btn {
+  --bs-btn-font-weight: 600;
+  --bs-btn-border-radius: 10px;
+  --bs-btn-focus-box-shadow: 0 0 0 3px var(--accent-soft);
+  min-width: 3rem;
+}
+
+.game .btn-outline-primary {
+  --bs-btn-color: var(--accent);
+  --bs-btn-bg: var(--surface);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-color: var(--on-accent);
+  --bs-btn-hover-bg: var(--accent);
+  --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-color: var(--on-accent);
+  --bs-btn-active-bg: var(--accent-strong);
+  --bs-btn-active-border-color: var(--accent-strong);
+}
+
+/* Solid button for the one action the player should take next. */
+.game .btn-primary {
+  --bs-btn-color: var(--on-accent);
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-color: var(--on-accent);
+  --bs-btn-hover-bg: var(--accent-strong);
+  --bs-btn-hover-border-color: var(--accent-strong);
+  --bs-btn-active-color: var(--on-accent);
+  --bs-btn-active-bg: var(--accent-strong);
+  --bs-btn-active-border-color: var(--accent-strong);
+}
+
+/* Shown when the player is in a winning position. */
+.game .btn-outline-danger {
+  --bs-btn-color: var(--last);
+  --bs-btn-bg: var(--last-soft);
+  --bs-btn-border-color: var(--last);
+  --bs-btn-hover-color: var(--on-accent);
+  --bs-btn-hover-bg: var(--last);
+  --bs-btn-hover-border-color: var(--last);
+  --bs-btn-active-color: var(--on-accent);
+  --bs-btn-active-bg: var(--last);
+  --bs-btn-active-border-color: var(--last);
+}
+
+/* ---- Turn prompt & result banner -------------------- */
+
+.turn-prompt {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.result-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 14px 0 0;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: banner-in 0.35s ease-out;
+}
+
+.result-banner strong {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+.result-banner span {
+  color: var(--muted);
+}
+
+.result-banner.win {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.result-banner.win strong {
+  color: var(--accent);
+}
+
+.result-banner.loss {
+  background: var(--last-soft);
+  border-color: var(--last);
+}
+
+.result-banner.loss strong {
+  color: var(--last);
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Boards ----------------------------------------- */
+
+.game-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 16px 0 8px;
+}
+
+div.boards {
+  box-sizing: content-box;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+}
+
+div.boards:not(.dead):hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+div.dead {
+  opacity: 0.4;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+div.dead canvas {
   cursor: not-allowed;
 }
 
-.scores {
-  font-size: 2em;
-  /* 40px/16=2.5em */
-  margin: 10px 0px;
+div.boards:not(.dead) canvas {
+  cursor: pointer;
+}
+
+/* Even number of boards: squares can't be clicked until the computer moves. */
+.game-board.locked div.boards canvas {
+  cursor: default;
+}
+
+.game-board.locked div.boards:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+}
+
+/* ---- Rules ------------------------------------------ */
+
+.rules-card {
+  margin-top: 28px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 640px;
+}
+
+.rules-card h2 {
+  font-size: 1.4rem;
+  margin: 0 0 8px;
 }
 
 .rules {
-  font-size: 1.5em;
-  display: block;
-  margin: 20px 10px;
+  margin: 0 0 8px;
+  padding-left: 1.2em;
 }
 
-span.emphasized {
-  font-weight: bold;
-  background-color: yellow;
+.rules li {
+  margin: 4px 0;
 }
 
-canvas.dead {
- opacity: 0.5;
+.rules li::marker {
+  color: var(--accent);
+}
+
+.last-move {
+  font-weight: 600;
+  color: var(--last);
+}
+
+.rules-card .more {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-banner {
+    animation: none;
+  }
+  div.boards {
+    transition: none;
+  }
+  div.boards:not(.dead):hover {
+    transform: none;
+  }
 }

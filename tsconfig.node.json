@@ -10,6 +10,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "composite": true,
+    "emitDeclarationOnly": true,
     "types": ["node"]
   },
   "include": ["vite.config.ts"]

@@ -1,0 +1,100 @@
+/* NoTakTo notes page. Colors come from src/shared/theme.css. */
+
+.notes {
+  max-width: 820px;
+}
+
+.crumbs a {
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 8px 0 20px;
+}
+
+.notes-header h1 {
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  margin: 0;
+}
+
+.play-button {
+  display: inline-block;
+  padding: 8px 18px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.play-button:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.card {
+  margin: 0 0 20px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card h2,
+.section-title {
+  font-size: 1.4rem;
+  margin: 0 0 10px;
+}
+
+.section-title {
+  margin-top: 32px;
+}
+
+.card p {
+  margin: 0 0 12px;
+  max-width: 68ch;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.refs {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.refs li {
+  margin: 6px 0;
+}
+
+.refs li::marker {
+  color: var(--accent);
+}
+
+.videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.videos iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}

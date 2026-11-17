@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { writeFileSync, mkdirSync } from 'fs'
 import { execSync } from 'child_process'
+import { resolve } from 'path'
 
 function getGitCommit() {
   try {
@@ -31,6 +32,16 @@ function versionPlugin() {
 
 export default defineConfig({
   plugins: [react(), versionPlugin()],
+  build: {
+    rollupOptions: {
+      // One HTML entry per page. Add new games here (e.g. foo: resolve(__dirname, 'foo/index.html')).
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        notakto: resolve(__dirname, 'notakto/index.html'),
+        discussion: resolve(__dirname, 'discussion.html'),
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
