@@ -37,29 +37,35 @@ jobs:
           echo "version.json content:"
           cat dist/version.json
 
-      - name: 🔑 Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 65002 ${{ secrets.FTP_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null || true
-
-      - name: 📂 Deploy with rsync
-        run: |
-          rsync -avz \
-            -e "ssh -i ~/.ssh/deploy_key -p 65002 -o ConnectTimeout=10" \
-            --delete \
-            --exclude='.git' \
-            dist/ \
-            ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }}:/home/${{ secrets.FTP_USERNAME }}/public_html/
-          
-          echo "✅ Rsync complete!"
+      # Uploads over FTP (no SSH shell access needed).
+      # Secrets: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD.
+      # Optional repository variables:
+      #   FTP_SERVER_DIR - remote folder, relative to the FTP login folder (default: public_html/)
+      #   FTP_PROTOCOL   - ftps (default, encrypted) or ftp
+      #   SITE_URL       - e.g. https://example.com, to check the deploy afterwards
+      # The action keeps a .ftp-deploy-sync-state.json file on the server so later
+      # runs upload only changed files and delete files removed from dist/.
+      - name: 📂 Deploy over FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./dist/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
 
       - name: ✅ Verify deployment
+        if: ${{ vars.SITE_URL != '' }}
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
         run: |
-          ssh -i ~/.ssh/deploy_key -p 65002 ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }} \
-            "echo '--- Files in public_html ---' && \
-             ls -lah /home/${{ secrets.FTP_USERNAME }}/public_html/ && \
-             echo '' && \
-             echo '--- version.json content ---' && \
-             cat /home/${{ secrets.FTP_USERNAME }}/public_html/version.json"
+          echo "--- Deployed version.json ---"
+          deployed=$(curl -fsSL --retry 3 "$SITE_URL/version.json?nocache=$GITHUB_RUN_ID")
+          echo "$deployed"
+          if echo "$deployed" | grep -q "$GITHUB_SHA"; then
+            echo "✅ Site is serving commit $GITHUB_SHA"
+          else
+            echo "❌ Site is not serving commit $GITHUB_SHA"
+            exit 1
+          fi
