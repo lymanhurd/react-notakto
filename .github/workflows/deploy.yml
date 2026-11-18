@@ -40,9 +40,10 @@ jobs:
       # Uploads over FTP (no SSH shell access needed).
       # Secrets: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD.
       # Optional repository variables:
-      #   FTP_SERVER_DIR - remote folder, relative to the FTP login folder (default: public_html/)
+      #   FTP_SERVER_DIR - remote folder, relative to the FTP login folder (default: ./,
+      #                    since the Hostinger FTP account logs straight into public_html)
       #   FTP_PROTOCOL   - ftps (default, encrypted) or ftp
-      #   SITE_URL       - e.g. https://example.com, to check the deploy afterwards
+      #   SITE_URL       - site to check after deploying (default: https://lymanslogicgames.com)
       # The action keeps a .ftp-deploy-sync-state.json file on the server so later
       # runs upload only changed files and delete files removed from dist/.
       - name: 📂 Deploy over FTP
@@ -53,12 +54,11 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
           local-dir: ./dist/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
+          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
 
       - name: ✅ Verify deployment
-        if: ${{ vars.SITE_URL != '' }}
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://lymanslogicgames.com' }}
         run: |
           echo "--- Deployed version.json ---"
           deployed=$(curl -fsSL --retry 3 "$SITE_URL/version.json?nocache=$GITHUB_RUN_ID")
