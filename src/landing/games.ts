@@ -21,4 +21,11 @@ export const games: GameEntry[] = [
       "Tic-tac-toe where both players play X's. A board with three in a row is dead. Whoever kills the last board loses.",
     tags: ['vs. computer', 'Multiple boards'],
   },
+  {
+    title: 'Nim',
+    href: '/nim/',
+    description:
+      'Take stones from one row at a time. Whoever takes the last stone wins. Learn to win every time by grouping stones into power-of-two clusters.',
+    tags: ['vs. computer', 'Strategy lesson'],
+  },
 ];

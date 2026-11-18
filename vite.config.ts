@@ -39,6 +39,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         notakto: resolve(__dirname, 'notakto/index.html'),
         discussion: resolve(__dirname, 'discussion.html'),
+        nim: resolve(__dirname, 'nim/index.html'),
       },
     },
   },

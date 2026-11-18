@@ -1,0 +1,432 @@
+/* Nim page styles. Base colors come from src/shared/theme.css. */
+
+:root {
+  /* One color per cluster size, so matching sizes are easy to spot across rows. */
+  --c8: #6741d9;   /* violet */
+  --c4: #2b4c9b;   /* ink blue */
+  --c2: #0b7285;   /* teal */
+  --c1: #c2410c;   /* burnt orange */
+  --stone-plain: #5f6676;
+
+  /* Stones shrink on narrow screens so a 15-stone row still fits. */
+  --stone: clamp(14px, calc((100vw - 120px) / 20), 26px);
+  --stone-gap: calc(var(--stone) / 6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c8: #b197fc;
+    --c4: #93b1ff;
+    --c2: #66d9e8;
+    --c1: #ffa94d;
+    --stone-plain: #a3a8b5;
+  }
+}
+
+/* ---- Board setup --------------------------------------- */
+
+.nim-setup {
+  margin-bottom: 16px;
+}
+
+.preset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.preset {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.preset:hover {
+  border-color: var(--accent);
+}
+
+.preset.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.preset-rows {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.preset-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.custom-board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.custom-board label {
+  font-weight: 600;
+}
+
+.custom-board input {
+  font: inherit;
+  width: 11em;
+  min-height: 40px;
+  padding: 4px 10px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.custom-board input[aria-invalid='true'] {
+  border-color: var(--last);
+}
+
+.custom-help {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.custom-help.error {
+  color: var(--last);
+  font-weight: 600;
+}
+
+/* ---- Controls ------------------------------------------ */
+
+.nim-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggles {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.toggles input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+.hint-note {
+  margin: 8px 0 0;
+  padding: 8px 14px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+}
+
+/* ---- Board & tally layout ------------------------------ */
+
+.nim-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 20px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.nim-layout.no-tally {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 720px) {
+  .nim-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.nim-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.nim-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: calc(var(--stone) + 12px);
+}
+
+.nim-row-label {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 8.5em;
+  line-height: 1.2;
+}
+
+.nim-row-name {
+  font-weight: 600;
+}
+
+.nim-row-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .nim-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .nim-row-label {
+    flex-direction: row;
+    gap: 8px;
+    flex-basis: auto;
+  }
+}
+
+.nim-stones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A cluster is a loop around its stones (only drawn when clusters are shown). */
+.nim-cluster {
+  display: inline-flex;
+  gap: var(--stone-gap);
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  --c: var(--stone-plain);
+}
+
+/* Without clusters, stones sit in one even line. */
+.nim-board:not(.show-clusters) .nim-stones {
+  gap: var(--stone-gap);
+}
+
+.nim-board:not(.show-clusters) .nim-cluster {
+  padding: 0;
+  border-width: 0;
+}
+
+.show-clusters .nim-cluster.c8 { --c: var(--c8); }
+.show-clusters .nim-cluster.c4 { --c: var(--c4); }
+.show-clusters .nim-cluster.c2 { --c: var(--c2); }
+.show-clusters .nim-cluster.c1 { --c: var(--c1); }
+
+.show-clusters .nim-cluster {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+}
+
+.nim-stone {
+  width: var(--stone);
+  height: var(--stone);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c);
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nim-stone:disabled {
+  cursor: default;
+}
+
+.nim-stone:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Stones the player is pointing at, has selected, or the computer is about to take. */
+.nim-stone.preview {
+  opacity: 0.45;
+}
+
+.nim-stone.selected,
+.nim-stone.pending {
+  opacity: 0.3;
+  box-shadow: 0 0 0 3px var(--last);
+  transform: scale(0.85);
+}
+
+.nim-stone.hint {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent);
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  50% {
+    box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px transparent;
+  }
+}
+
+/* ---- Tally --------------------------------------------- */
+
+.tally-card {
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.tally-card h2 {
+  font-size: 1.25rem;
+  margin: 0 0 8px;
+}
+
+.tally-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.tally-table th,
+.tally-table td {
+  padding: 6px 4px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.tally-table thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tally-table tbody th {
+  white-space: nowrap;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+
+.swatch.c8 { background: var(--c8); }
+.swatch.c4 { background: var(--c4); }
+.swatch.c2 { background: var(--c2); }
+.swatch.c1 { background: var(--c1); }
+
+.tally-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 1.4em;
+}
+
+.mark {
+  display: inline-block;
+  width: 2.5px;
+  height: 1.15em;
+  margin: 0 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* A matched pair is crossed off, as on the worksheet. */
+.tally-pair {
+  position: relative;
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.tally-pair::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: 50%;
+  border-top: 2px solid var(--muted);
+  transform: rotate(-30deg);
+}
+
+.tally-odd {
+  display: inline-flex;
+  color: var(--last);
+}
+
+.tally-none {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.parity {
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.parity.even {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.parity.odd {
+  background: var(--last-soft);
+  color: var(--last);
+}
+
+.verdict {
+  margin: 12px 0 0;
+}
+
+.verdict.balanced strong {
+  color: var(--accent);
+}
+
+.verdict.unbalanced strong {
+  color: var(--last);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nim-stone {
+    transition: none;
+  }
+  .nim-stone.hint {
+    animation: none;
+  }
+}
