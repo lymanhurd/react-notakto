@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Lyman's Logic Games: paper tile, an earlier move (ink blue) and the latest move (vermilion). -->
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="#fffdf7" stroke="#e2dac6" stroke-width="2"/>
+  <path d="M11 11L30 30M30 11L11 30" stroke="#2b4c9b" stroke-width="8" stroke-linecap="round"/>
+  <path d="M34 34L53 53M53 34L34 53" stroke="#d9480f" stroke-width="8" stroke-linecap="round"/>
+</svg>
