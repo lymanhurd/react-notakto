@@ -1,0 +1,106 @@
+/* Kayles board. Shared game styles are in src/shared/play.css. */
+
+.kayles-board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 6px;
+}
+
+/* A run of standing pins, outlined as one group. */
+.kayles-run {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kayles-pins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px 6px;
+  border: 2px solid var(--c2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c2) 8%, transparent);
+}
+
+.kayles-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pin {
+  background: var(--c2);
+  cursor: pointer;
+}
+
+.pin:disabled {
+  cursor: default;
+}
+
+/* A knocked-down pin keeps its place in the row as a faint outline. */
+.kayles-down {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 2px;
+}
+
+.dot.down {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+
+/* The small link between two neighboring pins: click it to knock down both. */
+.link {
+  flex: none;
+  width: calc(var(--stone) * 0.55);
+  height: calc(var(--stone) * 0.55);
+  margin: 0 3px;
+  padding: 0;
+  border: 2px solid var(--c2);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.link:disabled {
+  cursor: default;
+}
+
+.link:hover:not(:disabled),
+.link.preview {
+  background: var(--last);
+  border-color: var(--last);
+  transform: scale(1.15);
+}
+
+.link.pending {
+  background: var(--last);
+  border-color: var(--last);
+}
+
+.link.hint {
+  border-color: var(--accent);
+  animation: link-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes link-pulse {
+  50% {
+    background: var(--accent);
+  }
+}
+
+.kayles-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+  .link.hint {
+    animation: none;
+  }
+}

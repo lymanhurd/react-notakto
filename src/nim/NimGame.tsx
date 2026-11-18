@@ -8,14 +8,13 @@ import {
   isGameOver,
   MAX_ROW,
   MAX_ROWS,
-  oddSizes,
   parseRows,
   PRESETS,
   randomRows,
-  tally,
   winningMoves,
 } from './logic';
 import type { Move, Rows } from './logic';
+import { BalanceTally } from '../shared/GameParts';
 
 type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
@@ -131,67 +130,6 @@ function NimBoard({
         );
       })}
     </div>
-  );
-}
-
-// ---- Tally ------------------------------------------------------
-
-function Marks({ count }: { count: number }) {
-  // Pairs are drawn crossed off (as on the worksheet); a leftover single mark stays plain.
-  const pairs = Math.floor(count / 2);
-  return (
-    <span className="tally-marks" aria-hidden="true">
-      {Array.from({ length: pairs }, (_, i) => (
-        <span key={i} className="tally-pair"><i className="mark" /><i className="mark" /></span>
-      ))}
-      {count % 2 === 1 && <span className="tally-odd"><i className="mark" /></span>}
-      {count === 0 && <span className="tally-none">none</span>}
-    </span>
-  );
-}
-
-function TallyPanel({ rows, sizes }: { rows: Rows; sizes: number[] }) {
-  const counts = tally(rows);
-  const odd = oddSizes(rows);
-  const balanced = odd.length === 0;
-  return (
-    <section className="tally-card" aria-label="Cluster tally">
-      <h2>Cluster tally</h2>
-      <table className="tally-table">
-        <thead>
-          <tr>
-            <th scope="col">Cluster</th>
-            <th scope="col">Tally</th>
-            <th scope="col">Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sizes.map(size => {
-            const count = counts.get(size) ?? 0;
-            const isOdd = count % 2 === 1;
-            return (
-              <tr key={size} className={isOdd ? 'odd' : 'even'}>
-                <th scope="row">
-                  <span className={`swatch c${size}`} aria-hidden="true" />
-                  {size}'s
-                </th>
-                <td><Marks count={count} /></td>
-                <td>
-                  {count} <span className={`parity ${isOdd ? 'odd' : 'even'}`}>{isOdd ? 'Odd' : 'Even'}</span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p className={`verdict ${balanced ? 'balanced' : 'unbalanced'}`}>
-        {balanced ? (
-          <><strong>Balanced.</strong> Every cluster size is even.</>
-        ) : (
-          <><strong>Unbalanced.</strong> Odd: {odd.map(s => `${s}'s`).join(', ')}.</>
-        )}
-      </p>
-    </section>
   );
 }
 
@@ -343,7 +281,7 @@ export default function NimGame() {
         </div>
       </header>
 
-      <section className="nim-setup" aria-label="Choose a starting board">
+      <section className="play-setup" aria-label="Choose a starting board">
         <div className="preset-list">
           {PRESETS.map(p => {
             const active = fmt(p.rows) === fmt(startRows);
@@ -387,7 +325,7 @@ export default function NimGame() {
         </form>
       </section>
 
-      <div className="nim-controls">
+      <div className="play-controls">
         {phase === 'setup' && (
           <button type="button" className="btn-theme primary" onClick={computerFirst}>
             Computer moves first
@@ -463,7 +401,7 @@ export default function NimGame() {
         </p>
       )}
 
-      <div className={`nim-layout${prefs.showTally ? '' : ' no-tally'}`}>
+      <div className={`play-layout${prefs.showTally ? '' : ' no-tally'}`}>
         <NimBoard
           rows={rows}
           showClusters={prefs.showClusters}
@@ -475,7 +413,7 @@ export default function NimGame() {
           onHover={setHover}
           onPick={pick}
         />
-        {prefs.showTally && <TallyPanel rows={rows} sizes={sizes} />}
+        {prefs.showTally && <BalanceTally values={rows} sizes={sizes} />}
       </div>
 
       <section className="rules-card">

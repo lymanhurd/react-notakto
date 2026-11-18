@@ -7,6 +7,10 @@
  * but nothing in the UI needs to mention binary.)
  */
 
+import { isBalanced } from '../shared/balance';
+
+export { CLUSTER_SIZES, clusters, isBalanced, oddSizes, tally } from '../shared/balance';
+
 /** A board is just the number of stones left in each row. */
 export type Rows = number[];
 
@@ -37,49 +41,6 @@ export const PRESETS: Preset[] = [
   { rows: [2, 4, 6], label: 'Game 3' },
   { rows: [4, 6, 7], label: 'Boss challenge' },
 ];
-
-/** Cluster sizes the UI knows about, biggest first. */
-export const CLUSTER_SIZES = [8, 4, 2, 1] as const;
-
-/**
- * Greedy grouping rule: biggest power of two that fits, then the next, down to 1.
- * clusters(13) → [8, 4, 1]
- */
-export function clusters(stones: number): number[] {
-  const out: number[] = [];
-  let left = stones;
-  for (let size = 1 << 30; size >= 1; size >>= 1) {
-    if (left >= size) {
-      out.push(size);
-      left -= size;
-    }
-  }
-  return out;
-}
-
-/** How many clusters of each size are on the board, e.g. {4: 2, 2: 1, 1: 2}. */
-export function tally(rows: Rows): Map<number, number> {
-  const counts = new Map<number, number>();
-  for (const n of rows) {
-    for (const size of clusters(n)) {
-      counts.set(size, (counts.get(size) ?? 0) + 1);
-    }
-  }
-  return counts;
-}
-
-/** Cluster sizes whose board-wide tally is odd, biggest first. */
-export function oddSizes(rows: Rows): number[] {
-  return [...tally(rows).entries()]
-    .filter(([, count]) => count % 2 === 1)
-    .map(([size]) => size)
-    .sort((a, b) => b - a);
-}
-
-/** Balanced = every cluster size appears an even number of times (0 counts as even). */
-export function isBalanced(rows: Rows): boolean {
-  return oddSizes(rows).length === 0;
-}
 
 export function totalStones(rows: Rows): number {
   return rows.reduce((a, b) => a + b, 0);

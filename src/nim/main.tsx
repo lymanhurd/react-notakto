@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../shared/theme.css';
+import '../shared/play.css';
 import './nim.css';
 import NimGame from './NimGame';
 import SiteFooter from '../shared/SiteFooter';

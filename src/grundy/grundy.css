@@ -1,0 +1,110 @@
+/* Grundy's Game board. Shared game styles are in src/shared/play.css. */
+
+.grundy-board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 18px;
+}
+
+/* One group: a loop around its dots, with the cut gaps between them. */
+.grundy-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grundy-dots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px 6px;
+  border: 2px solid var(--c4);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c4) 8%, transparent);
+}
+
+.grundy-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Groups of 1 or 2 can't be split any further. */
+.grundy-group.dead .grundy-dots {
+  border-color: var(--border);
+  background: transparent;
+}
+
+.grundy-group.dead .dot {
+  background: var(--stone-plain);
+  opacity: 0.45;
+}
+
+/* The clickable gap between two dots; a cut line appears on hover. */
+.gap-btn {
+  position: relative;
+  flex: none;
+  width: calc(var(--stone) * 0.55);
+  height: calc(var(--stone) + 8px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.gap-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background 0.12s ease;
+}
+
+.gap-btn:disabled {
+  cursor: default;
+}
+
+.gap-btn.preview::after,
+.gap-btn:hover:not(:disabled)::after {
+  background: var(--last);
+}
+
+.gap-btn.pending::after {
+  background: var(--last);
+  box-shadow: 0 0 0 3px var(--last-soft);
+}
+
+.gap-btn.hint::after {
+  background: var(--accent);
+  animation: gap-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes gap-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Equal-split gaps are not moves: show a faint "=" so the rule is visible. */
+.grundy-group:not(.dead) .gap-btn.equal::before {
+  content: '=';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gap-btn.hint::after {
+    animation: none;
+  }
+}

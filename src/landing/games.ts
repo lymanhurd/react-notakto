@@ -28,4 +28,18 @@ export const games: GameEntry[] = [
       'Take stones from one row at a time. Whoever takes the last stone wins. Learn to win every time by grouping stones into power-of-two clusters.',
     tags: ['vs. computer', 'Strategy lesson'],
   },
+  {
+    title: "Grundy's Game",
+    href: '/grundy/',
+    description:
+      "Split a group of dots into two groups of different sizes. Whoever makes the last split wins. The Nim strategy works here too, once you know each group's value.",
+    tags: ['vs. computer', 'Nim in disguise'],
+  },
+  {
+    title: 'Kayles',
+    href: '/kayles/',
+    description:
+      'Knock down one pin, or two pins side by side. Whoever knocks down the last pin wins. Another game the Nim strategy solves.',
+    tags: ['vs. computer', 'Nim in disguise'],
+  },
 ];

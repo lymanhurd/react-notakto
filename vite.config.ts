@@ -40,6 +40,8 @@ export default defineConfig({
         notakto: resolve(__dirname, 'notakto/index.html'),
         discussion: resolve(__dirname, 'discussion.html'),
         nim: resolve(__dirname, 'nim/index.html'),
+        grundy: resolve(__dirname, 'grundy/index.html'),
+        kayles: resolve(__dirname, 'kayles/index.html'),
       },
     },
   },
