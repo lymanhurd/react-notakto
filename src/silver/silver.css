@@ -1,0 +1,261 @@
+/* Silver Dollar Game board. Shared game styles are in src/shared/play.css. */
+
+.silver {
+  --silver-1: #f1f3f5;
+  --silver-2: #adb5bd;
+  --silver-edge: #868e96;
+  --copper-1: #f4b183;
+  --copper-2: #b0602c;
+  --copper-edge: #8a4419;
+  --plain-1: #e9ecef;
+  --plain-2: #9aa3ad;
+  --plain-edge: #7b8590;
+  --gap-fill: color-mix(in srgb, var(--c4) 16%, var(--surface));
+}
+
+@media (prefers-color-scheme: dark) {
+  .silver {
+    --gap-fill: color-mix(in srgb, var(--c4) 22%, var(--surface));
+  }
+}
+
+.strip-scroll {
+  /* Squares are sized to the board's width (not the window's); the strip only
+     scrolls sideways if even the smallest squares don't fit. */
+  container-type: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 16px;
+}
+
+.strip {
+  --cell: clamp(24px, calc((100cqw - 36px) / var(--squares)), 46px);
+  --coin-size: calc(var(--cell) * 0.78);
+  display: grid;
+  grid-template-rows: var(--cell) auto auto;
+  align-items: center;
+  width: max-content;
+}
+
+.star {
+  display: grid;
+  place-items: center;
+  padding-right: 8px;
+  font-size: calc(var(--cell) * 0.6);
+  color: var(--last);
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--cell);
+  height: var(--cell);
+  box-sizing: border-box;
+  border: 1.5px solid var(--grid);
+  margin-left: -1.5px;
+  background: var(--surface);
+  transition: background 0.12s ease;
+}
+
+/* Nim view: the empty squares that count as a pile. */
+.cell.counted {
+  background: var(--gap-fill);
+}
+
+/* Squares the picked-up coin can slide to. */
+.cell.target {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+
+.cell.target.hovered,
+.cell.pending-target {
+  background: color-mix(in srgb, var(--last) 30%, var(--surface));
+}
+
+.cell.hint-target {
+  box-shadow: inset 0 0 0 3px var(--accent);
+  animation: target-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes target-pulse {
+  50% {
+    box-shadow: inset 0 0 0 3px transparent;
+  }
+}
+
+.target-btn {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.target-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.target-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+/* Coins: plain metal normally; silver/copper in the Nim view. */
+.coin {
+  width: var(--coin-size);
+  height: var(--coin-size);
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--plain-edge);
+  background: radial-gradient(circle at 35% 30%, var(--plain-1), var(--plain-2));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 0 0 3px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.coin.trailing {
+  border-color: var(--silver-edge);
+  background: radial-gradient(circle at 35% 30%, var(--silver-1), var(--silver-2));
+}
+
+.coin.leading {
+  border-color: var(--copper-edge);
+  background: radial-gradient(circle at 35% 30%, var(--copper-1), var(--copper-2));
+}
+
+.coin:hover:not(:disabled):not(.stuck) {
+  transform: translateY(-2px);
+}
+
+.coin:disabled,
+.coin.stuck {
+  cursor: default;
+}
+
+.coin:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.coin.selected {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent), 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.coin.pending {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--last);
+}
+
+.coin.hint {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent);
+  animation: coin-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes coin-pulse {
+  50% {
+    box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px transparent;
+  }
+}
+
+.cell-number {
+  padding-top: 2px;
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bracket under each counted pair, labeled with its pile size. */
+.pair-bracket {
+  position: relative;
+  height: 22px;
+  margin: 2px 4px 0;
+  border: 2px solid var(--c4);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.pair-gap {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  transform: translateX(-50%);
+  min-width: 1.6em;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--on-accent);
+  background: var(--c4);
+}
+
+.pair-bracket.empty {
+  border-color: var(--border);
+}
+
+.pair-bracket.empty .pair-gap {
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.silver-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 22px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.legend-coin,
+.legend-cell {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+}
+
+.legend-coin {
+  border-radius: 50%;
+}
+
+.legend-coin.trailing {
+  background: radial-gradient(circle at 35% 30%, var(--silver-1), var(--silver-2));
+  border: 1px solid var(--silver-edge);
+}
+
+.legend-coin.leading {
+  background: radial-gradient(circle at 35% 30%, var(--copper-1), var(--copper-2));
+  border: 1px solid var(--copper-edge);
+}
+
+.legend-cell {
+  background: var(--gap-fill);
+  border: 1px solid var(--grid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coin,
+  .cell {
+    transition: none;
+  }
+  .coin.hint,
+  .cell.hint-target {
+    animation: none;
+  }
+}

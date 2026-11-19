@@ -42,6 +42,7 @@ export default defineConfig({
         nim: resolve(__dirname, 'nim/index.html'),
         grundy: resolve(__dirname, 'grundy/index.html'),
         kayles: resolve(__dirname, 'kayles/index.html'),
+        silver: resolve(__dirname, 'silver/index.html'),
       },
     },
   },

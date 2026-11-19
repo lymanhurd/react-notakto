@@ -42,4 +42,11 @@ export const games: GameEntry[] = [
       'Knock down one pin, or two pins side by side. Whoever knocks down the last pin wins. Another game the Nim strategy solves.',
     tags: ['vs. computer', 'Nim in disguise'],
   },
+  {
+    title: 'Silver Dollar Game',
+    href: '/silver/',
+    description:
+      "John Conway's coin-sliding game. Slide a coin toward the star; whoever makes the last move wins. Turn on the Nim view to see every other gap become a Nim pile.",
+    tags: ['vs. computer', 'Nim in disguise'],
+  },
 ];
