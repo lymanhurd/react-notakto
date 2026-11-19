@@ -15,6 +15,7 @@ import {
 } from './logic';
 import type { Move, Rows } from './logic';
 import { BalanceTally } from '../shared/GameParts';
+import { trackGameEnd, trackGameStart } from '../shared/analytics';
 
 type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
@@ -156,6 +157,7 @@ export default function NimGame() {
 
   /** Apply a move for `who`, then hand the turn over or end the game. */
   function play(who: Player, move: Move) {
+    if (who === 'human' && phase === 'setup') trackGameStart('nim', 'human', fmt(rows));
     const next = applyMove(rows, move);
     setRows(next);
     setSelection(null);
@@ -165,6 +167,7 @@ export default function NimGame() {
       // Normal play: whoever takes the last stone wins.
       setPhase('over');
       setWinner(who);
+      trackGameEnd('nim', who);
       setStats(s => (who === 'human'
         ? { ...s, humanWins: s.humanWins + 1 }
         : { ...s, computerWins: s.computerWins + 1 }));
@@ -220,6 +223,7 @@ export default function NimGame() {
   }
 
   function computerFirst() {
+    trackGameStart('nim', 'computer', fmt(rows));
     setPhase('playing');
     setTurn('computer');
     setPending(computerMove(rows));

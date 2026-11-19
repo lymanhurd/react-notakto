@@ -2,7 +2,7 @@ import '../shared/theme.css';
 import './landing.css';
 import { games } from './games';
 import SiteFooter from '../shared/SiteFooter';
-import { STORE_URL } from '../shared/links';
+import { STORE_URL, storeClickAttrs } from '../shared/links';
 
 const Landing = () => (
   <div className="page landing">
@@ -12,7 +12,7 @@ const Landing = () => (
       <p className="tagline">Short games of logic and strategy. Pick one to play.</p>
       <p className="header-store">
         Teaching with these games?{' '}
-        <a href={STORE_URL} target="_blank" rel="noopener">Get the classroom worksheets</a>
+        <a href={STORE_URL} target="_blank" rel="noopener" {...storeClickAttrs('home-header')}>Get the classroom worksheets</a>
       </p>
     </header>
 
@@ -53,7 +53,7 @@ const Landing = () => (
             answer keys, are available in the Lyman's Logic Games store on <em>Teachers Pay Teachers</em>.
           </p>
         </div>
-        <a className="store-button" href={STORE_URL} target="_blank" rel="noopener">
+        <a className="store-button" href={STORE_URL} target="_blank" rel="noopener" {...storeClickAttrs('home-panel')}>
           Visit the store <span aria-hidden="true">↗</span>
           <span className="visually-hidden"> (opens Teachers Pay Teachers in a new tab)</span>
         </a>

@@ -46,6 +46,8 @@ export default function SilverGame() {
     isOver: isGameOver,
     computerMove,
     statsKey: 'silverStats',
+    game: 'silver',
+    describeStart: c => `${c.length} coins / ${prefs.squares} squares`,
   });
   const coins = game.state;
 

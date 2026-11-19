@@ -30,8 +30,40 @@ function versionPlugin() {
   }
 }
 
+/**
+ * Umami analytics (https://umami.is). Paste the site ID from the Umami dashboard
+ * (Settings → Websites → Edit → Website ID). It is not a secret: it appears in
+ * every page's HTML. Leave it empty to build without analytics. The UMAMI_WEBSITE_ID
+ * environment variable overrides it.
+ */
+const UMAMI_WEBSITE_ID = '923f6683-6cb7-4c49-be2b-d2b0cbc27b16'
+
+function analyticsPlugin() {
+  const id = process.env.UMAMI_WEBSITE_ID || UMAMI_WEBSITE_ID
+  return {
+    name: 'umami-analytics',
+    apply: 'build' as const,
+    transformIndexHtml() {
+      if (!id) return []
+      return [{
+        tag: 'script',
+        attrs: {
+          defer: true,
+          src: 'https://cloud.umami.is/script.js',
+          'data-website-id': id,
+          // Only count the real site, never local previews.
+          'data-domains': 'lymanslogicgames.com',
+          // Respect the browser's "Do Not Track" setting.
+          'data-do-not-track': 'true',
+        },
+        injectTo: 'head' as const,
+      }]
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), versionPlugin()],
+  plugins: [react(), versionPlugin(), analyticsPlugin()],
   build: {
     rollupOptions: {
       // One HTML entry per page. Add new games here (e.g. foo: resolve(__dirname, 'foo/index.html')).

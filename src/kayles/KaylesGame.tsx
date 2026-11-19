@@ -65,6 +65,8 @@ export default function KaylesGame() {
     isOver: isGameOver,
     computerMove: computerKnock,
     statsKey: 'kaylesStats',
+    game: 'kayles',
+    describeStart: p => `${p.length} pins`,
   });
   const pins = game.state;
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { load, save } from './storage';
+import { trackGameEnd, trackGameStart } from './analytics';
 import type { Player, Stats } from './GameParts';
 
 export type Phase = 'setup' | 'playing' | 'over';
@@ -12,6 +13,10 @@ interface Options<S, M> {
   computerMove: (state: S) => M | null;
   /** sessionStorage key for the running score. */
   statsKey: string;
+  /** Game name for analytics, e.g. "grundy". */
+  game: string;
+  /** Short description of a starting position for analytics, e.g. "8 dots". */
+  describeStart: (state: S) => string;
   delayMs?: number;
 }
 
@@ -21,7 +26,7 @@ interface Options<S, M> {
  * then played; whoever makes the last move wins.
  */
 export function useTurnGame<S, M>({
-  initial, apply, isOver, computerMove, statsKey, delayMs = 900,
+  initial, apply, isOver, computerMove, statsKey, game, describeStart, delayMs = 900,
 }: Options<S, M>) {
   const [state, setState] = useState<S>(initial);
   const [phase, setPhase] = useState<Phase>('setup');
@@ -40,12 +45,15 @@ export function useTurnGame<S, M>({
   useEffect(() => save(statsKey, stats), [statsKey, stats]);
 
   function play(who: Player, move: M) {
+    // The human's first move from the setup screen starts the game.
+    if (who === 'human' && phase === 'setup') trackGameStart(game, 'human', describeStart(stateRef.current));
     const next = apply(stateRef.current, move);
     stateRef.current = next;
     setState(next);
     if (isOver(next)) {
       setPhase('over');
       setWinner(who);
+      trackGameEnd(game, who);
       setStats(s => (who === 'human'
         ? { ...s, humanWins: s.humanWins + 1 }
         : { ...s, computerWins: s.computerWins + 1 }));
@@ -86,6 +94,7 @@ export function useTurnGame<S, M>({
       if (humanToMove) play('human', move);
     },
     computerFirst() {
+      trackGameStart(game, 'computer', describeStart(stateRef.current));
       setPhase('playing');
       setTurn('computer');
       setPending(computerMove(stateRef.current));

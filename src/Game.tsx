@@ -7,6 +7,7 @@ import './index.css';
 import { computerMove, isDead, isStart, humanMove, isGameOver } from './logic';
 import { isWinning } from './monoid';
 import type { BoardString, GameStats, GameState, Player } from './types/game';
+import { trackGameEnd, trackGameStart } from './shared/analytics';
 
 // ---- Constants ----------------------------------------
 
@@ -299,12 +300,17 @@ export default function Game() {
     }
   }
 
+  const boardsLabel = (n: number) => `${n} ${n === 1 ? 'board' : 'boards'}`;
+
   function handleStart() {
+    trackGameStart('notakto', 'computer', boardsLabel(boards.length));
     const result = computerMove(boards);
     if (result !== undefined) setBoards(result);
   }
 
   function handleQuit() {
+    // Quitting mid-game counts as a computer win; "Play Again" after a finished game doesn't.
+    if (!isGameOver(boards) && !isStart(boards)) trackGameEnd('notakto', 'computer', true);
     const newBoards: BoardString[] = new Array(boards.length).fill('---------');
     setBoards(newBoards);
     setLastWinner(null);
@@ -326,10 +332,12 @@ export default function Game() {
 
     let newBoards = humanMove(boards, idx, squareNum);
     if (newBoards === null) return;
+    if (isStart(boards)) trackGameStart('notakto', 'human', boardsLabel(boards.length));
 
     if (isGameOver(newBoards)) {
       setBoards(newBoards);
       setLastWinner('computer');
+      trackGameEnd('notakto', 'computer');
       setStats(prev => ({ ...prev, computerWins: prev.computerWins + 1 }));
       return;
     }
@@ -342,6 +350,7 @@ export default function Game() {
     if (isGameOver(newBoards)) {
       setBoards(newBoards);
       setLastWinner('human');
+      trackGameEnd('notakto', 'human');
       setStats(prev => ({ ...prev, humanWins: prev.humanWins + 1 }));
       return;
     }

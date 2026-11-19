@@ -44,6 +44,8 @@ export default function GrundyGame() {
     isOver: isGameOver,
     computerMove: computerSplit,
     statsKey: 'grundyStats',
+    game: 'grundy',
+    describeStart: g => `${g.reduce((a, b) => a + b, 0)} dots`,
   });
   const groups = game.state;
 
