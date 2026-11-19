@@ -128,3 +128,67 @@ a.game-card:hover .play span {
     transform: none;
   }
 }
+
+.header-store {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Teachers Pay Teachers store panel under the game cards. */
+.store-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  margin-top: 32px;
+  padding: 22px 26px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius);
+}
+
+.store-callout > div {
+  flex: 1 1 320px;
+}
+
+.store-callout h2 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+}
+
+.store-callout p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+.store-callout .eyebrow {
+  margin-bottom: 4px;
+}
+
+.store-button {
+  flex: none;
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--on-accent);
+  background: var(--accent);
+  transition: background 0.15s ease;
+}
+
+.store-button:hover {
+  color: var(--on-accent);
+  background: var(--accent-strong);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
