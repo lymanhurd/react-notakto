@@ -44,8 +44,11 @@ jobs:
       #                    since the Hostinger FTP account logs straight into public_html)
       #   FTP_PROTOCOL   - ftps (default, encrypted) or ftp
       #   SITE_URL       - site to check after deploying (default: https://lymanslogicgames.com)
-      # The action keeps a .ftp-deploy-sync-state.json file on the server so later
-      # runs upload only changed files and delete files removed from dist/.
+      # The action keeps a sync-state file on the server so later runs upload only
+      # changed files and delete files removed from dist/. The default name
+      # (.ftp-deploy-sync-state.json) holds a stale record from an older site, which
+      # made every run try to delete folders that no longer exist; using a new name
+      # makes the next run start fresh (upload everything, delete nothing).
       - name: 📂 Deploy over FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -55,6 +58,7 @@ jobs:
           protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
           local-dir: ./dist/
           server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
+          state-name: .logic-games-sync-state.json
 
       - name: ✅ Verify deployment
         env:
