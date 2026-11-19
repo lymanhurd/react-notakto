@@ -17,6 +17,8 @@ import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, ResultBanner, Scoreboard } from '../shared/GameParts';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
+import { CoinFace } from './CoinFace';
+import type { CoinKind } from './CoinFace';
 
 const PREFS_KEY = 'silverPrefs';
 
@@ -126,8 +128,14 @@ export default function SilverGame() {
     prompt = 'Your move. Click a coin to pick it up.';
   }
 
+  /** Normal play: every coin is a quarter. Nim view: leading coins are pennies, trailing coins dimes. */
+  function coinKind(pos: number): CoinKind {
+    if (!prefs.showGaps) return 'quarter';
+    return role.get(pos) === 'leading' ? 'penny' : 'dime';
+  }
+
   function coinClasses(pos: number): string {
-    const classes = ['coin'];
+    const classes = ['coin', coinKind(pos)];
     if (prefs.showGaps) classes.push(role.get(pos) ?? 'trailing');
     if (pos === selected) classes.push('selected');
     if (game.pending && game.pending.from === pos) classes.push('pending');
@@ -239,9 +247,11 @@ export default function SilverGame() {
                         className={coinClasses(s)}
                         disabled={!game.humanToMove}
                         aria-pressed={s === selected}
-                        aria-label={`Coin on square ${s + 1}${prefs.showGaps ? ` (${role.get(s) === 'leading' ? 'copper, leading' : 'silver, trailing'})` : ''}`}
+                        aria-label={`Coin on square ${s + 1}${prefs.showGaps ? ` (${role.get(s) === 'leading' ? 'penny: copper, leading' : 'dime: silver, trailing'})` : ''}`}
                         onClick={() => clickCoin(s)}
-                      />
+                      >
+                        <CoinFace kind={coinKind(s)} />
+                      </button>
                     ) : targets.has(s) ? (
                       <button
                         type="button"
@@ -275,8 +285,8 @@ export default function SilverGame() {
           </div>
           {prefs.showGaps && (
             <p className="silver-legend">
-              <span className="legend-coin trailing" aria-hidden="true" /> silver (trailing)
-              <span className="legend-coin leading" aria-hidden="true" /> copper (leading)
+              <span className="legend-coin dime" aria-hidden="true"><CoinFace kind="dime" /></span> dime = silver (trailing)
+              <span className="legend-coin penny" aria-hidden="true"><CoinFace kind="penny" /></span> penny = copper (leading)
               <span className="legend-cell" aria-hidden="true" /> counted gap = Nim pile
             </p>
           )}
@@ -303,7 +313,7 @@ export default function SilverGame() {
       <section className="rules-card strategy-card">
         <h2>Strategy: Nim in disguise</h2>
         <ol className="rules">
-          <li>Starting from the far end, label the coins alternately <strong>silver</strong> (trailing) and <strong>copper</strong> (leading).</li>
+          <li>Starting from the far end, label the coins alternately <strong>silver</strong> (trailing) and <strong>copper</strong> (leading). In the Nim view the silver coins become dimes and the copper coins pennies.</li>
           <li>Each silver coin is paired with the copper coin just ahead of it. The number of empty squares between them is a <strong>Nim pile</strong>. With an odd number of coins, the last silver coin is paired with the star end of the strip.</li>
           <li>The gaps <em>in front of</em> copper coins don't count at all.</li>
           <li>If your opponent moves a <strong>copper</strong> coin, its gap behind grows: slide the matching silver coin the same number of squares to undo it.</li>

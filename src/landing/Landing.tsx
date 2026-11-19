@@ -2,9 +2,7 @@ import '../shared/theme.css';
 import './landing.css';
 import { games } from './games';
 import SiteFooter from '../shared/SiteFooter';
-
-/** Lyman's Logic Games store on Teachers Pay Teachers (worksheets for the games). */
-const STORE_URL = 'https://www.teacherspayteachers.com/store/lymans-logic-games';
+import { STORE_URL } from '../shared/links';
 
 const Landing = () => (
   <div className="page landing">
@@ -62,7 +60,7 @@ const Landing = () => (
       </section>
     </main>
 
-    <SiteFooter />
+    <SiteFooter showStore={false} />
   </div>
 );
 

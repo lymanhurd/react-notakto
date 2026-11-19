@@ -1,15 +1,6 @@
 /* Silver Dollar Game board. Shared game styles are in src/shared/play.css. */
 
 .silver {
-  --silver-1: #f1f3f5;
-  --silver-2: #adb5bd;
-  --silver-edge: #868e96;
-  --copper-1: #f4b183;
-  --copper-2: #b0602c;
-  --copper-edge: #8a4419;
-  --plain-1: #e9ecef;
-  --plain-2: #9aa3ad;
-  --plain-edge: #7b8590;
   --gap-fill: color-mix(in srgb, var(--c4) 16%, var(--surface));
 }
 
@@ -30,7 +21,8 @@
 
 .strip {
   --cell: clamp(24px, calc((100cqw - 36px) / var(--squares)), 46px);
-  --coin-size: calc(var(--cell) * 0.78);
+  /* A quarter nearly fills its square; dimes and pennies are drawn to scale against it. */
+  --coin-size: calc(var(--cell) * 0.86);
   display: grid;
   grid-template-rows: var(--cell) auto auto;
   align-items: center;
@@ -111,27 +103,38 @@
   outline-offset: -3px;
 }
 
-/* Coins: plain metal normally; silver/copper in the Nim view. */
+/* Coins: quarters in normal play; pennies (copper) and dimes (silver) in the Nim view.
+   The face is an SVG (CoinFace); the button supplies the shape, shadow and focus rings. */
 .coin {
   width: var(--coin-size);
   height: var(--coin-size);
   padding: 0;
+  border: 0;
   border-radius: 50%;
-  border: 2px solid var(--plain-edge);
-  background: radial-gradient(circle at 35% 30%, var(--plain-1), var(--plain-2));
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 0 0 3px rgba(255, 255, 255, 0.25);
+  background: transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, opacity 0.15s ease, width 0.2s ease, height 0.2s ease;
 }
 
-.coin.trailing {
-  border-color: var(--silver-edge);
-  background: radial-gradient(circle at 35% 30%, var(--silver-1), var(--silver-2));
+.coin.penny {
+  width: calc(var(--coin-size) * 0.785);
+  height: calc(var(--coin-size) * 0.785);
 }
 
-.coin.leading {
-  border-color: var(--copper-edge);
-  background: radial-gradient(circle at 35% 30%, var(--copper-1), var(--copper-2));
+.coin.dime {
+  width: calc(var(--coin-size) * 0.738);
+  height: calc(var(--coin-size) * 0.738);
+}
+
+.coin-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  pointer-events: none;
+  user-select: none;
 }
 
 .coin:hover:not(:disabled):not(.stuck) {
@@ -225,26 +228,22 @@
 .legend-coin,
 .legend-cell {
   display: inline-block;
-  width: 14px;
-  height: 14px;
   margin-left: 8px;
 }
 
 .legend-coin {
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
 }
 
-.legend-coin.trailing {
-  background: radial-gradient(circle at 35% 30%, var(--silver-1), var(--silver-2));
-  border: 1px solid var(--silver-edge);
-}
-
-.legend-coin.leading {
-  background: radial-gradient(circle at 35% 30%, var(--copper-1), var(--copper-2));
-  border: 1px solid var(--copper-edge);
+.legend-coin.dime {
+  width: 16px;
+  height: 16px;
 }
 
 .legend-cell {
+  width: 14px;
+  height: 14px;
   background: var(--gap-fill);
   border: 1px solid var(--grid);
 }

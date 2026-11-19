@@ -309,3 +309,58 @@ a:hover {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Teachers Pay Teachers note above the footer on game pages. */
+.store-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: 40px;
+  padding: 16px 20px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius);
+}
+
+.store-note p {
+  flex: 1 1 320px;
+  margin: 0;
+  max-width: 70ch;
+}
+
+.store-note-link {
+  flex: none;
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--on-accent);
+  background: var(--accent);
+  transition: background 0.15s ease;
+}
+
+/* The `.page a` color rule (NoTakTo) is more specific than a plain class. */
+.page a.store-note-link,
+.page a.store-note-link:hover {
+  color: var(--on-accent);
+}
+
+.store-note-link:hover {
+  background: var(--accent-strong);
+}
+
+.store-note + .site-footer {
+  margin-top: 24px;
+}

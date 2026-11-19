@@ -31,6 +31,11 @@ describe('SilverGame', () => {
     renderTwoCoins()
     expect(coinSquares()).toHaveLength(2)
     expect(document.querySelector('.coin.trailing, .coin.leading')).toBeNull()
+    // Every coin is drawn as a quarter.
+    expect(document.querySelectorAll('.coin.quarter')).toHaveLength(2)
+    for (const img of document.querySelectorAll('.coin img')) {
+      expect(img.getAttribute('src')).toBe('/images/coins/quarter.png')
+    }
     expect(document.querySelector('.pair-bracket')).toBeNull()
     expect(screen.queryByText('Gap tally')).toBeNull()
   })
@@ -39,6 +44,12 @@ describe('SilverGame', () => {
     renderTwoCoins(true)
     expect(document.querySelectorAll('.coin.trailing')).toHaveLength(1)
     expect(document.querySelectorAll('.coin.leading')).toHaveLength(1)
+    // Trailing (silver) coins are dimes and leading (copper) coins are pennies; no quarters.
+    expect(document.querySelectorAll('.coin.trailing.dime')).toHaveLength(1)
+    expect(document.querySelectorAll('.coin.leading.penny')).toHaveLength(1)
+    expect(document.querySelector('.coin.quarter')).toBeNull()
+    expect(document.querySelector('.coin.dime img')?.getAttribute('src')).toBe('/images/coins/dime.png')
+    expect(document.querySelector('.coin.penny img')?.getAttribute('src')).toBe('/images/coins/penny.png')
     expect(document.querySelectorAll('.pair-bracket')).toHaveLength(1)
     expect(screen.getByText('Gap tally')).toBeDefined()
   })
