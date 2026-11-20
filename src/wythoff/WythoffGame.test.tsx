@@ -20,29 +20,34 @@ describe('WythoffGame', () => {
   it('starts at (7, 11) and shows the grid and the piles together', () => {
     render(<WythoffGame />)
     expect(marker()).toBe('Marker at (7, 11)')
-    expect(pileCounts()).toEqual(['7 stones', '11 stones'])
+    expect(pileCounts()).toEqual(['7', '11'])
   })
 
-  it('marks the P squares, including the corner', () => {
+  it('marks the special squares and asks about them only when asked', () => {
     render(<WythoffGame />)
-    const pCells = document.querySelectorAll('.wy-cell.p')
-    expect(pCells).toHaveLength(13)
-    expect(document.querySelectorAll('.wy-cell.n')).toHaveLength(16 * 16 - 13)
+    expect(document.querySelectorAll('.wy-cell.marked')).toHaveLength(0)
+    expect(screen.queryByText(/significance of the marked squares/)).toBeNull()
+    fireEvent.click(screen.getByLabelText('Mark special squares'))
+    expect(document.querySelectorAll('.wy-cell.marked')).toHaveLength(13)
+    expect(document.querySelector('.wy-lines')).not.toBeNull()
+    expect(screen.getByText('What is the significance of the marked squares?')).toBeDefined()
+    expect(screen.getByText('What are the slopes of the lines that connect them?')).toBeDefined()
   })
 
   it('moves on the grid and updates the piles, then the computer replies to a P square', () => {
     render(<WythoffGame />)
     fireEvent.click(screen.getByRole('button', { name: 'Move to (5, 9)' }))
-    expect(pileCounts()).toEqual(['5 stones', '9 stones'])
+    expect(pileCounts()).toEqual(['5', '9'])
     expect(status()).toMatch(/computer will take/)
     act(() => {
       vi.advanceTimersByTime(1000)
     })
     expect(status()).toMatch(/The computer chose to take .* Your move\./)
-    expect(document.querySelector('.wy-cell.here')!.classList.contains('p')).toBe(true)
+    fireEvent.click(screen.getByLabelText('Mark special squares'))
+    expect(document.querySelector('.wy-cell.here')!.classList.contains('marked')).toBe(true)
   })
 
-  it('takes from a pile, or the same number from both', () => {
+  it('takes stones from the left of a row, or the same number from both rows', () => {
     render(<WythoffGame />)
     fireEvent.click(screen.getByRole('button', { name: 'Take 3 from pile B' }))
     expect(marker()).toBe('Marker at (7, 8)')
@@ -52,8 +57,8 @@ describe('WythoffGame', () => {
     cleanup()
     sessionStorage.clear()
     render(<WythoffGame />)
-    fireEvent.click(screen.getByLabelText('Take the same number from both piles'))
-    fireEvent.click(screen.getAllByRole('button', { name: 'Take 2 from both piles' })[0])
+    expect(screen.getAllByRole('button', { name: /from both piles/ })).toHaveLength(7)
+    fireEvent.click(screen.getByRole('button', { name: 'Take 2 from both piles' }))
     expect(marker()).toBe('Marker at (5, 9)')
   })
 
@@ -62,19 +67,6 @@ describe('WythoffGame', () => {
     const moves = screen.getAllByRole('button', { name: /^Move to/ })
     expect(moves).toHaveLength(7 + 11 + 7)
     expect(screen.queryByRole('button', { name: 'Move to (6, 9)' })).toBeNull()
-  })
-
-  it('builds the marks one P square at a time', () => {
-    render(<WythoffGame />)
-    fireEvent.change(screen.getByLabelText(/squares/), { target: { value: 'build' } })
-    expect(document.querySelectorAll('.wy-cell.p, .wy-cell.n')).toHaveLength(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Next step' }))
-    expect(document.querySelectorAll('.wy-cell.p')).toHaveLength(1)
-    expect(document.querySelectorAll('.wy-cell.n')).toHaveLength(45)
-    fireEvent.click(screen.getByRole('button', { name: 'Next step' }))
-    expect(screen.getByText(/\(2, 1\) is the first blank square/)).toBeDefined()
-    fireEvent.click(screen.getByRole('button', { name: 'Finish' }))
-    expect(document.querySelectorAll('.wy-cell.p')).toHaveLength(13)
   })
 
   it('wins when the player reaches (0, 0)', () => {

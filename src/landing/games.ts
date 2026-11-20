@@ -53,7 +53,7 @@ export const games: GameEntry[] = [
     title: "Wythoff's Nim",
     href: '/wythoff/',
     description:
-      'Take any number of stones from one pile, or the same number from both. Play it on two piles or as a grid, and find the safe squares hiding along the golden ratio.',
-    tags: ['vs. computer', 'Golden ratio'],
+      'Take any number of stones from one pile, or the same number from both. Play it on two piles or as a grid, and look for the pattern in the special squares.',
+    tags: ['vs. computer', 'Two views'],
   },
 ];

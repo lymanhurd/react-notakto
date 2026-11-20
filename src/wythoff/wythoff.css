@@ -43,22 +43,6 @@
   color: var(--on-accent);
 }
 
-.wy-select {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.95rem;
-}
-
-.wy-select select {
-  font: inherit;
-  padding: 4px 8px;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
 .wy-layout {
   display: flex;
   flex-wrap: wrap;
@@ -196,23 +180,26 @@
   outline-offset: -2px;
 }
 
-.wy-cell.n {
-  color: color-mix(in srgb, var(--muted) 70%, transparent);
-}
-
-.wy-cell.p {
-  color: var(--safe);
-  font-weight: 700;
-  background: color-mix(in srgb, var(--safe) 18%, transparent);
-}
-
 /* Squares the marker can move to. */
 .wy-cell.reach {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
-.wy-cell.p.reach {
-  background: color-mix(in srgb, var(--safe) 30%, transparent);
+.wy-cell.marked {
+  background: color-mix(in srgb, var(--safe) 28%, transparent);
+}
+
+.wy-cell.marked::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: var(--safe);
+  pointer-events: none;
+}
+
+.wy-cell.here::after {
+  display: none;
 }
 
 .wy-cell.preview {
@@ -230,20 +217,6 @@
 @keyframes wy-hint {
   0%, 100% { box-shadow: inset 0 0 0 3px var(--accent); }
   50% { box-shadow: inset 0 0 0 3px transparent; }
-}
-
-/* The latest step of the marking procedure. */
-.wy-cell.new-n {
-  background: var(--last-soft);
-}
-
-.wy-cell.new-p {
-  box-shadow: inset 0 0 0 2px var(--safe);
-  animation: wy-pop 0.4s ease-out;
-}
-
-@keyframes wy-pop {
-  from { transform: scale(1.4); }
 }
 
 .wy-marker {
@@ -271,24 +244,26 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* ---- The piles ----------------------------------------------- */
+/* ---- The piles: two rows of stones, lined up in columns ------- */
 
 .wy-piles {
   flex: 1 1 300px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.wy-pile {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
 }
 
-.wy-pile-label {
+.wy-pile-row {
   display: flex;
+  align-items: center;
   gap: 10px;
+  min-height: var(--stone);
+}
+
+.wy-pile-label {
+  flex: 0 0 5.5em;
+  display: flex;
+  gap: 8px;
   align-items: baseline;
 }
 
@@ -302,23 +277,27 @@
   font-variant-numeric: tabular-nums;
 }
 
+.wy-links-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .wy-stones {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--stone-gap);
-  min-height: var(--stone);
   align-items: center;
 }
 
-.wy-pile:first-child .wy-stone {
+.pile-a .wy-stone {
   --c: var(--c4);
 }
 
-.wy-pile:nth-child(2) .wy-stone {
+.pile-b .wy-stone {
   --c: var(--c2);
 }
 
-.wy-stone.preview {
+.wy-stone.preview,
+.wy-link.preview {
   opacity: 0.4;
 }
 
@@ -333,65 +312,90 @@
   animation: hint-pulse 1.2s ease-in-out infinite;
 }
 
+/* A link between the two rows: take this many from both piles. */
+.wy-link {
+  position: relative;
+  width: var(--stone);
+  height: calc(var(--stone) * 0.9);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.wy-link::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.12s ease;
+}
+
+.wy-link:hover:not(:disabled)::before,
+.wy-link.preview::before,
+.wy-link:focus-visible::before {
+  background: var(--accent);
+}
+
+.wy-link.pending::before {
+  background: var(--last);
+}
+
+.wy-link.hint::before {
+  background: var(--accent);
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+.wy-link:disabled {
+  cursor: default;
+}
+
+.wy-link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .wy-empty {
   font-size: 0.85rem;
   color: var(--muted);
   font-style: italic;
 }
 
-.wy-both {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-}
-
-.wy-both input {
-  width: 1.1em;
-  height: 1.1em;
-  accent-color: var(--accent);
-}
-
 .wy-equiv {
-  margin: 0;
+  margin: 8px 0 0;
   font-size: 0.9rem;
   color: var(--muted);
 }
 
-.wy-equiv strong {
-  font-family: 'Cambria Math', 'STIX Two Math', serif;
-  color: var(--ink);
+/* ---- Questions shown with the marked squares ------------------ */
+
+.wy-questions {
+  margin: 0 0 16px;
+  padding: 12px 18px;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--safe);
 }
 
-/* ---- Step-by-step marking ------------------------------------ */
-
-.wy-build {
-  margin-bottom: 16px;
+.wy-questions h2 {
+  margin: 0 0 6px;
+  font-size: 1rem;
 }
 
-.wy-build-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.wy-build-count {
-  font-size: 0.9rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.wy-build-text {
+.wy-questions ol {
   margin: 0;
-  max-width: 70ch;
+  padding-left: 1.3em;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wy-cell.hint,
-  .wy-cell.new-p,
-  .wy-stone.hint {
+  .wy-stone.hint,
+  .wy-link.hint {
     animation: none;
   }
 }
