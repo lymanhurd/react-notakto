@@ -261,7 +261,7 @@
 }
 
 .wy-pile-label {
-  flex: 0 0 5.5em;
+  flex: 0 0 5.5rem;
   display: flex;
   gap: 8px;
   align-items: baseline;
