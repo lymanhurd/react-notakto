@@ -1,0 +1,397 @@
+/* Wythoff's Nim: the grid and the two piles. Shared game styles are in src/shared/play.css. */
+
+.wythoff {
+  /* Grid squares shrink so the 16 × 16 grid fits a phone. */
+  --cell: clamp(16px, calc((100vw - 96px) / 16), 30px);
+  --safe: var(--c2);
+  --golden: #b8860b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .wythoff {
+    --golden: #f0c043;
+  }
+}
+
+.wy-options {
+  margin-top: -4px;
+}
+
+.wy-segmented {
+  display: inline-flex;
+}
+
+.wy-segmented .btn-theme {
+  border-radius: 0;
+}
+
+.wy-segmented .btn-theme:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+.wy-segmented .btn-theme:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.wy-segmented .btn-theme + .btn-theme {
+  margin-left: -1px;
+}
+
+.wy-segmented .btn-theme.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.wy-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.wy-select select {
+  font: inherit;
+  padding: 4px 8px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.wy-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.wy-layout.view-piles .wy-piles {
+  flex: 1 1 100%;
+}
+
+/* ---- The grid ------------------------------------------------ */
+
+.wy-grid-card {
+  flex: none;
+  max-width: 100%;
+  padding: 12px;
+}
+
+.wy-grid-wrap {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto auto;
+  align-items: center;
+}
+
+.wy-axis-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.wy-axis-title.y {
+  grid-column: 1;
+  grid-row: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-right: 2px;
+}
+
+.wy-y-labels {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wy-grid-area {
+  grid-column: 3;
+  grid-row: 1;
+  position: relative;
+}
+
+.wy-x-labels {
+  grid-column: 3;
+  grid-row: 2;
+  display: flex;
+}
+
+.wy-axis-title.x {
+  grid-column: 3;
+  grid-row: 3;
+  text-align: center;
+}
+
+.wy-y-labels span,
+.wy-x-labels span {
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wy-y-labels span {
+  height: var(--cell);
+  padding-right: 4px;
+  justify-items: end;
+}
+
+.wy-x-labels span {
+  width: var(--cell);
+  padding-top: 2px;
+}
+
+.wy-grid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--grid);
+}
+
+.wy-row {
+  display: flex;
+}
+
+.wy-cell {
+  position: relative;
+  width: var(--cell);
+  height: var(--cell);
+  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.wy-row:first-child .wy-cell {
+  border-top: 0;
+}
+
+.wy-cell:last-child {
+  border-right: 0;
+}
+
+.wy-cell > button,
+.wy-cell > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', serif;
+  font-size: calc(var(--cell) * 0.6);
+  line-height: 1;
+}
+
+.wy-cell > button {
+  cursor: pointer;
+}
+
+.wy-cell > button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.wy-cell.n {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+
+.wy-cell.p {
+  color: var(--safe);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--safe) 18%, transparent);
+}
+
+/* Squares the marker can move to. */
+.wy-cell.reach {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.wy-cell.p.reach {
+  background: color-mix(in srgb, var(--safe) 30%, transparent);
+}
+
+.wy-cell.preview {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.wy-cell.pending {
+  box-shadow: inset 0 0 0 3px var(--last);
+}
+
+.wy-cell.hint {
+  animation: wy-hint 1.2s ease-in-out infinite;
+}
+
+@keyframes wy-hint {
+  0%, 100% { box-shadow: inset 0 0 0 3px var(--accent); }
+  50% { box-shadow: inset 0 0 0 3px transparent; }
+}
+
+/* The latest step of the marking procedure. */
+.wy-cell.new-n {
+  background: var(--last-soft);
+}
+
+.wy-cell.new-p {
+  box-shadow: inset 0 0 0 2px var(--safe);
+  animation: wy-pop 0.4s ease-out;
+}
+
+@keyframes wy-pop {
+  from { transform: scale(1.4); }
+}
+
+.wy-marker {
+  display: block;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--last);
+}
+
+.wy-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.wy-lines line {
+  stroke: var(--golden);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- The piles ----------------------------------------------- */
+
+.wy-piles {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wy-pile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wy-pile-label {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.wy-pile-name {
+  font-weight: 600;
+}
+
+.wy-pile-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wy-stones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stone-gap);
+  min-height: var(--stone);
+  align-items: center;
+}
+
+.wy-pile:first-child .wy-stone {
+  --c: var(--c4);
+}
+
+.wy-pile:nth-child(2) .wy-stone {
+  --c: var(--c2);
+}
+
+.wy-stone.preview {
+  opacity: 0.4;
+}
+
+.wy-stone.pending {
+  opacity: 0.3;
+  box-shadow: 0 0 0 3px var(--last);
+  transform: scale(0.85);
+}
+
+.wy-stone.hint {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent);
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+.wy-empty {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.wy-both {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.wy-both input {
+  width: 1.1em;
+  height: 1.1em;
+  accent-color: var(--accent);
+}
+
+.wy-equiv {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.wy-equiv strong {
+  font-family: 'Cambria Math', 'STIX Two Math', serif;
+  color: var(--ink);
+}
+
+/* ---- Step-by-step marking ------------------------------------ */
+
+.wy-build {
+  margin-bottom: 16px;
+}
+
+.wy-build-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wy-build-count {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wy-build-text {
+  margin: 0;
+  max-width: 70ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wy-cell.hint,
+  .wy-cell.new-p,
+  .wy-stone.hint {
+    animation: none;
+  }
+}

@@ -49,4 +49,11 @@ export const games: GameEntry[] = [
       "John Conway's coin-sliding game. Slide a coin toward the star; whoever makes the last move wins. Turn on the Nim view to see every other gap become a Nim pile.",
     tags: ['vs. computer', 'Nim in disguise'],
   },
+  {
+    title: "Wythoff's Nim",
+    href: '/wythoff/',
+    description:
+      'Take any number of stones from one pile, or the same number from both. Play it on two piles or as a grid, and find the safe squares hiding along the golden ratio.',
+    tags: ['vs. computer', 'Golden ratio'],
+  },
 ];

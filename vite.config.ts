@@ -75,6 +75,7 @@ export default defineConfig({
         grundy: resolve(__dirname, 'grundy/index.html'),
         kayles: resolve(__dirname, 'kayles/index.html'),
         silver: resolve(__dirname, 'silver/index.html'),
+        wythoff: resolve(__dirname, 'wythoff/index.html'),
       },
     },
   },
