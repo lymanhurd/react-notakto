@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import Game from './Game'
 
 // Mock canvas getContext so jsdom doesn't throw
@@ -82,5 +82,32 @@ describe('Game', () => {
     fireEvent.click(screen.getByRole('button', { name: /Play Again/i }))
     expect(screen.queryByText('You won!')).toBeNull()
     expect(screen.getByRole('status').textContent).toMatch(/you move first/i)
+  })
+
+  it('Hint marks the winning squares, then clears them', () => {
+    vi.useFakeTimers()
+    render(<Game />)
+    fireEvent.click(screen.getByRole('button', { name: 'Hint' }))
+    expect(screen.getByRole('note').textContent).toMatch(/leaves the computer in a losing position/)
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+    expect(screen.queryByRole('note')).toBeNull()
+    vi.useRealTimers()
+  })
+
+  it('Hint says when there is no winning move', () => {
+    sessionStorage.setItem('notaktoSession', JSON.stringify({
+      gameState: { lastWinner: null }, stats: { humanWins: 0, computerWins: 0 }, boards: ['----x----'],
+    }))
+    render(<Game />)
+    fireEvent.click(screen.getByRole('button', { name: 'Hint' }))
+    expect(screen.getByRole('note').textContent).toMatch(/no winning move/)
+  })
+
+  it('has no Hint button while waiting for the computer to start', () => {
+    render(<Game />)
+    fireEvent.click(screen.getByRole('button', { name: '+' }))
+    expect(screen.queryByRole('button', { name: 'Hint' })).toBeNull()
   })
 })

@@ -2,6 +2,7 @@
 
 /* Bootstrap sets its own body colors; point them at the shared theme. */
 :root {
+  --hint: #2f9e44;
   --bs-body-bg: var(--bg);
   --bs-body-color: var(--ink);
   --bs-body-font-family: var(--font-body);
@@ -133,6 +134,20 @@ div.boards:not(.dead) canvas {
   box-shadow: var(--shadow);
 }
 
+.hint-note {
+  margin: -4px 0 14px;
+  padding: 8px 14px;
+  background: var(--accent-soft);
+  border-left: 4px solid var(--hint);
+  border-radius: 8px;
+  max-width: 62ch;
+}
+
+.hint-x {
+  font-weight: 700;
+  color: var(--hint);
+}
+
 .last-move {
   font-weight: 600;
   color: var(--last);
@@ -148,5 +163,11 @@ div.boards:not(.dead) canvas {
   }
   div.boards:not(.dead):hover {
     transform: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hint: #69db7c;
   }
 }

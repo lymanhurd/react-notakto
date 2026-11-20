@@ -88,6 +88,30 @@ export function humanMove(
   return mkMove(boards, idx, squareNum);
 }
 
+/** A square on one board: `board` is the board's index, `square` is 0–8 (row by row). */
+export interface SquareRef {
+  board: number;
+  square: number;
+}
+
+/**
+ * winningMoves — every move that leaves a winning position for the player
+ * making it (so the opponent can't win against perfect play). Moves that kill
+ * the last board lose, so they are never included. Empty when no winning move exists.
+ */
+export function winningMoves(boards: BoardString[]): SquareRef[] {
+  const moves: SquareRef[] = [];
+  boards.forEach((b, board) => {
+    if (isDead(b)) return;
+    for (let square = 0; square < 9; square++) {
+      if (b[square] !== '-') continue;
+      const next = mkMove(boards, board, square);
+      if (!isGameOver(next) && isWinning(next)) moves.push({ board, square });
+    }
+  });
+  return moves;
+}
+
 /**
  * computerMove — picks a move for the computer.
  *

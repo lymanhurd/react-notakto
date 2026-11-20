@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './shared/theme.css';
 import './index.css';
 
-import { computerMove, isDead, isStart, humanMove, isGameOver } from './logic';
+import { computerMove, isDead, isStart, humanMove, isGameOver, winningMoves } from './logic';
 import { isWinning } from './monoid';
 import type { BoardString, GameStats, GameState, Player } from './types/game';
 import { trackGameEnd, trackGameStart } from './shared/analytics';
@@ -18,6 +18,8 @@ const CANVAS_SIZE = 3 * SQUARE_WIDTH + 2 * LINE_WIDTH;
 const X_OFFSET = 10;
 const MARK_WIDTH = 5;
 const SESSION_KEY = 'notaktoSession';
+/** How long hint marks stay on the boards. */
+const HINT_MS = 4000;
 
 // ---- Session storage types ----------------------------
 
@@ -91,6 +93,20 @@ function drawX(ctx: CanvasRenderingContext2D, moveIdx: number, clr: string): voi
   );
 }
 
+/** A small X in the middle of a square, marking a suggested move. */
+function drawHintX(ctx: CanvasRenderingContext2D, moveIdx: number, clr: string): void {
+  ctx.strokeStyle = clr;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  const col = moveIdx % 3;
+  const row = Math.floor(moveIdx / 3);
+  const cx = SQUARE_WITH_BDY * col + SQUARE_WIDTH / 2;
+  const cy = SQUARE_WITH_BDY * row + SQUARE_WIDTH / 2;
+  const r = SQUARE_WIDTH / 7;
+  drawLine(ctx, cx - r, cy - r, cx + r, cy + r);
+  drawLine(ctx, cx - r, cy + r, cx + r, cy - r);
+}
+
 // ---- Small Components ----------------------------------
 
 interface StartButtonProps {
@@ -130,6 +146,8 @@ function PlusButton({ onClick }: PlusMinusButtonProps) {
 interface BoardProps {
   contents: BoardString;
   className: string;
+  /** Squares to mark with a small hint X. */
+  hints?: number[];
   onClick?: (event: React.MouseEvent<HTMLCanvasElement>) => void;
 }
 
@@ -148,9 +166,10 @@ function useColorScheme(): boolean {
   return dark;
 }
 
-function Board({ contents, className, onClick }: BoardProps) {
+function Board({ contents, className, onClick, hints = [] }: BoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dark = useColorScheme();
+  const hintKey = hints.join(',');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -167,7 +186,11 @@ function Board({ contents, className, onClick }: BoardProps) {
         drawX(ctx, idx, last);
       }
     });
-  }, [contents, dark]);
+    const hintColor = themeColor(canvas, '--hint', '#2f9e44');
+    hints.forEach(sq => drawHintX(ctx, sq, hintColor));
+    // hintKey stands in for the hints array, which is a new object each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contents, dark, hintKey]);
 
   return (
     <div className={className}>
@@ -283,6 +306,18 @@ export default function Game() {
     saveSession(boards, stats, lastWinner);
   }, [boards, stats, lastWinner]);
 
+  // The current hint: the winning squares, or 'none'. It clears itself after a few seconds.
+  const [hint, setHint] = useState<{ moves: { board: number; square: number }[] } | null>(null);
+  useEffect(() => {
+    if (!hint) return;
+    const timer = window.setTimeout(() => setHint(null), HINT_MS);
+    return () => window.clearTimeout(timer);
+  }, [hint]);
+
+  function showHint() {
+    setHint({ moves: winningMoves(boards) });
+  }
+
   // With an odd number of boards the first player can force a win; with an
   // even number, the second player can. The human always gets the winning side.
   const humanMovesFirst = boards.length % 2 === 1;
@@ -303,12 +338,14 @@ export default function Game() {
   const boardsLabel = (n: number) => `${n} ${n === 1 ? 'board' : 'boards'}`;
 
   function handleStart() {
+    setHint(null);
     trackGameStart('notakto', 'computer', boardsLabel(boards.length));
     const result = computerMove(boards);
     if (result !== undefined) setBoards(result);
   }
 
   function handleQuit() {
+    setHint(null);
     // Quitting mid-game counts as a computer win; "Play Again" after a finished game doesn't.
     if (!isGameOver(boards) && !isStart(boards)) trackGameEnd('notakto', 'computer', true);
     const newBoards: BoardString[] = new Array(boards.length).fill('---------');
@@ -332,6 +369,7 @@ export default function Game() {
 
     let newBoards = humanMove(boards, idx, squareNum);
     if (newBoards === null) return;
+    setHint(null);
     if (isStart(boards)) trackGameStart('notakto', 'human', boardsLabel(boards.length));
 
     if (isGameOver(newBoards)) {
@@ -397,12 +435,26 @@ export default function Game() {
         ) : (
           <StartButton startLabel={buttonLabel} variant={buttonVariant} onClick={handleQuit} />
         )}
+        {!gameOver && !waitingForStart && (
+          <Button variant="outline-primary" size="lg" onClick={showHint}>
+            Hint
+          </Button>
+        )}
       </div>
 
       {gameOver ? (
         <ResultBanner winner={lastWinner} />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {hint && (
+        <p className="hint-note" role="note">
+          {hint.moves.length > 0
+            ? <>Hint: playing any square marked with a small <span className="hint-x">x</span> leaves the computer
+              in a losing position.</>
+            : <>There is no winning move right now: whatever you play, the computer can win with perfect
+              play. Make a move and hope it slips.</>}
+        </p>
       )}
 
       <div className={waitingForStart ? 'game-board locked' : 'game-board'}>
@@ -414,6 +466,7 @@ export default function Game() {
               key={idx}
               contents={elt}
               className="boards"
+              hints={hint?.moves.filter(m => m.board === idx).map(m => m.square)}
               onClick={(event) => handleBoardClick(event, idx)}
             />
           )
@@ -428,6 +481,7 @@ export default function Game() {
           <li>Whoever kills the last board loses.</li>
           <li>With an odd number of boards you move first; with an even number, press "Start" and the computer moves first. Either way, a perfect player can always win from your side.</li>
           <li>The <span className="last-move">highlighted X</span> is the most recent move.</li>
+          <li>Stuck? Press <strong>Hint</strong> to see, for a few seconds, every square that is a winning move.</li>
         </ul>
         <p className="more"><a href="/discussion.html">More discussion →</a></p>
       </section>
