@@ -116,11 +116,11 @@ export function winningMoves(boards: BoardString[]): SquareRef[] {
  * computerMove — picks a move for the computer.
  *
  * Strategy:
- * - Start from a random square to avoid always playing top-left.
- * - If the human is currently winning (isWinning), any legal move is
- *   acceptable — there is no winning response available.
- * - Otherwise, only accept a move that results in a winning position
- *   for the computer (isWinning after the move).
+ * - If a winning move exists, play one (chosen at random).
+ * - Otherwise the human is winning with perfect play, so the computer tries
+ *   to make the game as long and tricky as possible: it picks a random move
+ *   that does not kill a board, and only kills a board when every legal move
+ *   would do so.
  *
  * Returns the updated boards array, or undefined if no legal move exists
  * (should not happen in normal play).
@@ -128,34 +128,26 @@ export function winningMoves(boards: BoardString[]): SquareRef[] {
 export function computerMove(
   boards: BoardString[]
 ): BoardString[] | undefined {
-  const numSquares = 9 * boards.length;
-  const startingSquare = Math.floor(Math.random() * numSquares);
+  const winning: BoardString[][] = [];
+  const safe: BoardString[][] = [];
+  const killing: BoardString[][] = [];
 
-  // If the human is winning, any legal move is fine
-  const findAvailable = isWinning(boards);
-
-  for (let i = 0; i < numSquares; i++) {
-    const square = (i + startingSquare) % numSquares;
-    const idx = Math.floor(square / 9);
-
-    if (isDead(boards[idx])) {
-      continue;
-    }
-
-    const sqNum = square % 9;
-
-    if (boards[idx][sqNum] === '-') {
+  boards.forEach((b, idx) => {
+    if (isDead(b)) return;
+    for (let sqNum = 0; sqNum < 9; sqNum++) {
+      if (b[sqNum] !== '-') continue;
       const test = mkMove(boards, idx, sqNum);
-
-      if (findAvailable || isWinning(test)) {
-        return test;
-      }
+      if (!isGameOver(test) && isWinning(test)) winning.push(test);
+      else if (isDead(test[idx])) killing.push(test);
+      else safe.push(test);
     }
+  });
+
+  const pool = winning.length > 0 ? winning : safe.length > 0 ? safe : killing;
+  if (pool.length > 0) {
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  // Reaching here means either no open squares exist (should be caught
-  // upstream) or the monoid evaluation is inconsistent (mathematically
-  // impossible under correct game logic).
-  console.error('Monoid Error: computerMove found no valid move.');
+  console.error('computerMove found no legal move.');
   return undefined;
 }
