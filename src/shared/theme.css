@@ -1,7 +1,11 @@
+/* Brand display face, matching the rounded bold lettering of the TPT banners. */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap');
+
 /*
  * Shared design tokens for Lyman's Logic Games.
- * "Puzzle book" palette: warm paper, deep ink, one ink-blue accent,
- * and a vermilion highlight reserved for the most recent move.
+ * "Puzzle book" palette drawn from the Teachers Pay Teachers branding:
+ * warm paper, deep navy ink, a teal accent, and the badge's gold, orange and
+ * coral. Coral is reserved for the most recent move.
  * Every page imports this file; dark mode follows the OS setting.
  */
 :root {
@@ -9,41 +13,47 @@
 
   --bg: #f6f2e7;          /* paper */
   --surface: #fffdf7;     /* cards, boards */
-  --ink: #1d2433;         /* body text */
-  --muted: #5f6676;       /* secondary text */
+  --ink: #18234a;         /* navy body text */
+  --muted: #5a6278;       /* secondary text */
   --border: #e2dac6;      /* hairlines, card borders */
   --shadow: 0 1px 2px rgba(29, 36, 51, 0.06), 0 4px 14px rgba(29, 36, 51, 0.07);
   --shadow-lift: 0 2px 4px rgba(29, 36, 51, 0.08), 0 10px 24px rgba(29, 36, 51, 0.12);
 
-  --accent: #2b4c9b;      /* ink blue: links, buttons, focus */
-  --accent-strong: #1f3a7a;
-  --accent-soft: #e5ebf7;
+  --accent: #1c6b68;      /* teal: links, buttons, focus */
+  --accent-strong: #134f4d;
+  --accent-soft: #e0efec;
   --on-accent: #ffffff;
 
   --grid: #3a4152;        /* board lines */
   --mark: #2b4c9b;        /* X marks */
-  --last: #d9480f;        /* most recent move / warning */
+  --last: #d9481f;        /* coral: most recent move / warning */
   --last-soft: #fde8dd;
 
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+
+  /* Brand colors from the logo badge; the same in light and dark mode. */
+  --brand-navy: #13234d;
+  --brand-gold: #f8b827;
+  --brand-orange: #f08a24;
+  --brand-coral: #e0532f;
 
   --radius: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14171f;
-    --surface: #1d2130;
+    --bg: #10162a;
+    --surface: #1a2238;
     --ink: #e9e6dd;
     --muted: #a3a8b5;
-    --border: #2f3546;
+    --border: #2c3654;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
     --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 24px rgba(0, 0, 0, 0.35);
 
-    --accent: #93b1ff;
-    --accent-strong: #b7cbff;
-    --accent-soft: #232c45;
+    --accent: #6fd3c8;
+    --accent-strong: #a2e6de;
+    --accent-soft: #1a3433;
     --on-accent: #10131b;
 
     --grid: #c9ccd6;
@@ -101,22 +111,47 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 24px;
   flex-wrap: wrap;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
-.site-footer img {
-  width: 72px;
-  opacity: 0.85;
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
 }
 
-/* The HS logo is black-on-transparent; invert it so it shows on dark paper. */
-@media (prefers-color-scheme: dark) {
-  .site-footer img {
-    filter: invert(1);
-  }
+.footer-brand img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.page a.footer-brand,
+.footer-brand:hover {
+  color: var(--ink);
+}
+
+.footer-links {
+  display: flex;
+  gap: 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.footer-links a {
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
 }
 
 /* ---- End-of-game banner (shared by all games) ---------------- */

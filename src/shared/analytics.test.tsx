@@ -41,7 +41,7 @@ describe('analytics', () => {
   it('tags every store link with a store-click event and its location', () => {
     render(<Landing />)
     const home = [...document.querySelectorAll('a[href*="teacherspayteachers.com"]')]
-    expect(home.map(a => a.getAttribute('data-umami-event-location'))).toEqual(['home-header', 'home-panel'])
+    expect(home.map(a => a.getAttribute('data-umami-event-location'))).toEqual(['home-nav', 'home-header', 'home-panel'])
     expect(home.every(a => a.getAttribute('data-umami-event') === 'store-click')).toBe(true)
     expect(home.every(a => a.getAttribute('href')!.includes('utm_source=lymanslogicgames.com'))).toBe(true)
     cleanup()
@@ -52,5 +52,12 @@ describe('analytics', () => {
     expect(note.getAttribute('data-umami-event')).toBe('store-click')
     expect(note.getAttribute('data-umami-event-location')).toBe('game-page:nim')
     window.history.pushState({}, '', '/')
+  })
+
+  it('tags contact links with a contact-click event and points them at the contact address', () => {
+    render(<Landing />)
+    const links = [...document.querySelectorAll('a[href="mailto:lyman@lymanslogicgames.com"]')]
+    expect(links.map(a => a.getAttribute('data-umami-event-location'))).toEqual(['home-contact', 'footer:home'])
+    expect(links.every(a => a.getAttribute('data-umami-event') === 'contact-click')).toBe(true)
   })
 })

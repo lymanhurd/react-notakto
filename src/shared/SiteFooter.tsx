@@ -1,5 +1,5 @@
 import VersionInfo from './VersionInfo';
-import { STORE_URL, storeClickAttrs } from './links';
+import { CONTACT_EMAIL, STORE_URL, contactClickAttrs, storeClickAttrs } from './links';
 
 /** "nim", "silver", … from the current path, for tagging analytics events. */
 function pageName(): string {
@@ -8,10 +8,10 @@ function pageName(): string {
 
 /**
  * Footer shared by every page: a note pointing teachers to the worksheet store,
- * the Hurd-Sullivan logo and build info. The front page has its own, larger
- * store panel, so it passes showStore={false}.
+ * the Lyman's Logic Games badge, About/Contact links and build info. The front
+ * page has its own, larger store panel, so it passes showStore={false}.
  */
-const SiteFooter =({ showStore = true }: { showStore?: boolean }) => (
+const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
   <>
     {showStore && (
       <aside className="store-note" aria-label="Classroom worksheets">
@@ -27,8 +27,15 @@ const SiteFooter =({ showStore = true }: { showStore?: boolean }) => (
       </aside>
     )}
     <footer className="site-footer">
-      {/* Not linked for now: hurd-sullivan.com is being rebuilt. */}
-      <img src="/images/HS.gif" alt="Hurd-Sullivan" />
+      <a className="footer-brand" href="/">
+        <img src="/images/logo-badge-small.webp" alt="" width="48" height="48" />
+        <span>Lyman's Logic Games</span>
+      </a>
+      <nav className="footer-links" aria-label="Site">
+        <a href="/#games">Games</a>
+        <a href="/#about">About</a>
+        <a href={`mailto:${CONTACT_EMAIL}`} {...contactClickAttrs(`footer:${pageName()}`)}>Contact</a>
+      </nav>
       <VersionInfo />
     </footer>
   </>

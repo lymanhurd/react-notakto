@@ -8,7 +8,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="theme-color" content="#f6f2e7" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#14171f" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#10162a" media="(prefers-color-scheme: dark)" />
   <link rel="stylesheet" href="/src/shared/theme.css" />
   <link rel="stylesheet" href="/src/discussion/discussion.css" />
 </head>
@@ -72,8 +72,15 @@
     </section>
 
     <footer class="site-footer">
-      <!-- Not linked for now: hurd-sullivan.com is being rebuilt. -->
-      <img src="/images/HS.gif" alt="Hurd-Sullivan" />
+      <a class="footer-brand" href="/">
+        <img src="/images/logo-badge-small.webp" alt="" width="48" height="48" />
+        <span>Lyman's Logic Games</span>
+      </a>
+      <nav class="footer-links" aria-label="Site">
+        <a href="/#games">Games</a>
+        <a href="/#about">About</a>
+        <a href="mailto:lyman@lymanslogicgames.com" data-umami-event="contact-click" data-umami-event-location="footer:discussion">Contact</a>
+      </nav>
     </footer>
   </div>
 </body>

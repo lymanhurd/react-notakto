@@ -9,3 +9,11 @@ export const STORE_URL =
 export function storeClickAttrs(location: string) {
   return { 'data-umami-event': 'store-click', 'data-umami-event-location': location };
 }
+
+/** Public contact address shown in the Contact section and footer. */
+export const CONTACT_EMAIL = 'lyman@lymanslogicgames.com';
+
+/** Umami click-event attributes for a contact (mailto) link. */
+export function contactClickAttrs(location: string) {
+  return { 'data-umami-event': 'contact-click', 'data-umami-event-location': location };
+}
