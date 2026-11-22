@@ -56,4 +56,11 @@ export const games: GameEntry[] = [
       'Take any number of stones from one pile, or the same number from both. Play it on two piles or as a grid, and look for the pattern in the special squares.',
     tags: ['vs. computer', 'Two views'],
   },
+  {
+    title: 'Chomp',
+    href: '/chomp/',
+    description:
+      'Take turns biting a chocolate bar: each bite eats a square and everything above it and to its right. Eat the last good square and leave your opponent the poisoned one.',
+    tags: ['vs. computer', 'Strategy stealing'],
+  },
 ];

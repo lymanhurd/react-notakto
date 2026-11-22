@@ -1,0 +1,144 @@
+/* Chomp: the chocolate bar. Shared game styles are in src/shared/play.css. */
+
+.chomp {
+  --choc: #7b4a2d;
+  --choc-light: #9a6440;
+  --choc-edge: #5a321c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chomp {
+    --choc: #a8714b;
+    --choc-light: #c48b62;
+    --choc-edge: #6f4428;
+  }
+}
+
+.ch-size {
+  margin-top: 0;
+}
+
+.ch-board-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.ch-board {
+  /* Squares shrink so a 10-column bar fits a phone (--cols is set on the element). */
+  --cell: clamp(22px, calc((100vw - 110px) / var(--cols, 10) - 3px), 46px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ch-row {
+  display: flex;
+  gap: 3px;
+}
+
+.ch-cell {
+  flex: none;
+  width: var(--cell);
+  height: var(--cell);
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+
+/* An eaten square: a faint outline so the bar's original shape stays visible. */
+.ch-cell.eaten {
+  border: 1px dashed var(--border);
+}
+
+.ch-cell.square {
+  padding: 0;
+  border: 0;
+  background: linear-gradient(145deg, var(--choc-light), var(--choc));
+  box-shadow: inset 0 -3px 0 var(--choc-edge), inset 0 2px 0 rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.ch-cell.square:disabled {
+  cursor: default;
+}
+
+.ch-cell.square:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ch-cell.poison {
+  display: grid;
+  place-items: center;
+  background: var(--last-soft);
+  border: 2px solid var(--last);
+  color: var(--last);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(var(--cell) * 0.5);
+  line-height: 1;
+}
+
+/* About to be eaten: previewed on hover, chosen by the computer, or suggested by Hint. */
+.ch-cell.preview {
+  opacity: 0.35;
+  transform: scale(0.9);
+}
+
+.ch-cell.pending {
+  opacity: 0.35;
+  transform: scale(0.85);
+  box-shadow: 0 0 0 3px var(--last);
+}
+
+.ch-cell.hint {
+  box-shadow: 0 0 0 3px var(--accent);
+  animation: ch-hint 1.2s ease-in-out infinite;
+}
+
+.ch-cell.hint-target {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--accent);
+}
+
+@keyframes ch-hint {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.ch-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 10px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-label strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.ch-label span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.strategy-card {
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-cell.square {
+    transition: none;
+  }
+  .ch-cell.hint {
+    animation: none;
+  }
+}

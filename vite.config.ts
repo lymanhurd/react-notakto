@@ -76,6 +76,7 @@ export default defineConfig({
         kayles: resolve(__dirname, 'kayles/index.html'),
         silver: resolve(__dirname, 'silver/index.html'),
         wythoff: resolve(__dirname, 'wythoff/index.html'),
+        chomp: resolve(__dirname, 'chomp/index.html'),
       },
     },
   },
