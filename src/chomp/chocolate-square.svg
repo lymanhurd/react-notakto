@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!--
+    One square of a chocolate bar. Adapted (made square, filters removed) from
+    "Chocolate background" by Firkin, https://openclipart.org/detail/303127,
+    released into the public domain (CC0) via Openclipart.
+  -->
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ad8568"/>
+      <stop offset="1" stop-color="#874818"/>
+    </linearGradient>
+    <linearGradient id="left" x1="0" y1="0" x2="60" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ad8568"/>
+      <stop offset="1" stop-color="#874818"/>
+    </linearGradient>
+    <linearGradient id="bottom" x1="0" y1="400" x2="0" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b27d53"/>
+      <stop offset="0.15" stop-color="#5d2a01"/>
+      <stop offset="1" stop-color="#6b3610"/>
+    </linearGradient>
+    <linearGradient id="right" x1="400" y1="0" x2="340" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b27d53"/>
+      <stop offset="0.15" stop-color="#5d2a01"/>
+      <stop offset="1" stop-color="#6b3610"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="#643916"/>
+  <path d="M0 0H400L340 60H60Z" fill="url(#top)"/>
+  <path d="M0 0L60 60V340L0 400Z" fill="url(#left)"/>
+  <path d="M0 400L60 340H340L400 400Z" fill="url(#bottom)"/>
+  <path d="M400 0V400L340 340V60Z" fill="url(#right)"/>
+  <rect x="60" y="60" width="280" height="280" fill="#986747"/>
+  <g stroke="#ffcc4d" stroke-width="2.5" stroke-opacity="0.45" fill="none">
+    <rect x="60" y="60" width="280" height="280"/>
+    <path d="M0 0L60 60M340 60L400 0M400 400L340 340M0 400L60 340"/>
+  </g>
+</svg>
