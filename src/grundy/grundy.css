@@ -108,3 +108,100 @@
     animation: none;
   }
 }
+
+/* "Simple rules, unsolved problem" chart. */
+.chart-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.open-problem-chart {
+  margin: 0 0 10px;
+}
+
+.open-problem-chart svg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+}
+
+.open-problem-chart .grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.open-problem-chart .tick {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.open-problem-chart .pts {
+  fill: var(--c4);
+  opacity: 0.75;
+}
+
+.open-problem-chart .rug {
+  fill: var(--accent-soft);
+}
+
+.open-problem-chart .zeros {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.open-problem-chart .callout {
+  fill: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.open-problem-chart figcaption,
+.open-problem .sources {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* "See a pattern?" table: the guess holds through 12, then fails. */
+.pattern-break {
+  margin: 0 0 12px;
+}
+
+.pattern-break td.guess {
+  color: var(--muted);
+}
+
+.pattern-break td.right {
+  background: var(--accent-soft);
+}
+
+.pattern-break td.wrong {
+  background: color-mix(in srgb, var(--last) 22%, transparent);
+  font-weight: 700;
+}
+
+.pattern-break td.hidden-value {
+  color: var(--muted);
+}
+
+.pattern-reveal {
+  margin: 0 0 12px;
+}
+
+/* The revealed answer: boxed, with the coral of the "wrong" cells above it. */
+.pattern-reveal.answer-box {
+  max-width: 68ch;
+  padding: 10px 16px;
+  border: 2px solid var(--last);
+  border-left-width: 6px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--last) 10%, transparent);
+  font-size: 1.05rem;
+}

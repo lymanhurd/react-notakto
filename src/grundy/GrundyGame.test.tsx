@@ -55,4 +55,12 @@ describe('GrundyGame', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
     expect(screen.getByText('You won!')).toBeDefined()
   })
+
+  it('hides sizes 13 and up until the pattern reveal', () => {
+    render(<GrundyGame />)
+    expect(screen.queryByLabelText('3, not 0')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Click for answer' }))
+    expect(screen.getAllByLabelText('3, not 0').length).toBe(2)
+    expect(screen.getByText(/no pattern has turned up since/)).toBeDefined()
+  })
 })

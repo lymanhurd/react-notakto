@@ -73,3 +73,19 @@ export function computerSplit(groups: Groups, random: () => number = Math.random
   const pool = wins.length > 0 ? wins : legalSplits(groups);
   return pool.length > 0 ? pool[Math.floor(random() * pool.length)] : null;
 }
+
+/**
+ * Grundy values for every size 0..limit, computed with a typed array so the
+ * "open problem" chart can plot thousands of sizes quickly.
+ */
+export function grundyValuesUpTo(limit: number): Uint16Array {
+  const g = new Uint16Array(limit + 1);
+  const mark = new Uint32Array(1024);
+  for (let n = 3; n <= limit; n++) {
+    for (let a = 1; 2 * a < n; a++) mark[g[a] ^ g[n - a]] = n;
+    let m = 0;
+    while (mark[m] === n) m++;
+    g[n] = m;
+  }
+  return g;
+}

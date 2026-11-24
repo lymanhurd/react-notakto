@@ -3,6 +3,7 @@ import {
   applySplit,
   canSplit,
   computerSplit,
+  grundyValuesUpTo,
   grundyValue,
   groupValues,
   isGameOver,
@@ -68,5 +69,19 @@ describe('strategy', () => {
     const groups = [8]
     expect(isBalanced(groupValues(applySplit(groups, computerSplit(groups)!)))).toBe(true)
     expect(computerSplit([1, 2])).toBeNull()
+  })
+})
+
+describe('grundyValuesUpTo', () => {
+  it('matches grundyValue', () => {
+    const g = grundyValuesUpTo(300)
+    for (let n = 0; n <= 300; n++) expect(g[n]).toBe(grundyValue(n))
+  })
+
+  it('finds the 42 known zeros, the last at 1222 (OEIS A036685)', () => {
+    const g = grundyValuesUpTo(5000)
+    const zeros = [...g.keys()].filter(n => g[n] === 0)
+    expect(zeros.length).toBe(42)
+    expect(zeros[zeros.length - 1]).toBe(1222)
   })
 })

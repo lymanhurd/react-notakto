@@ -15,6 +15,7 @@ import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
+import OpenProblem, { LAST_SHOWN } from './OpenProblem';
 
 const PREFS_KEY = 'grundyPrefs';
 
@@ -225,17 +226,18 @@ export default function GrundyGame() {
         <h2>Strategy</h2>
         <p>
           Each group behaves exactly like a Nim row whose size is its <strong>value</strong> from the table
-          below. So use the Nim strategy: split each value into power-of-two clusters (8, 4, 2, 1), and hand
+          below. (Mathematicians also call this value the group's <em>nimber</em> or <em>Grundy value</em>.) So use the Nim strategy: split each value into power-of-two clusters (8, 4, 2, 1), and hand
           your opponent a board where every cluster size appears an even number of times.
         </p>
         <p>
           A group's value is the smallest number that is <em>not</em> the value of any position you can reach
-          from it in one split (the "mex" rule). Nobody has proved that the table eventually repeats, though it
-          has been computed for enormous groups.
+          from it in one split (the "mex" rule).
         </p>
-        <ValueTable label="Group size" max={Math.max(15, prefs.size)} value={grundyValue}
+        <ValueTable label="Group size" max={LAST_SHOWN} value={grundyValue}
           present={new Set(groups)} from={1} />
       </section>
+
+      <OpenProblem />
     </div>
   );
 }
