@@ -17,7 +17,7 @@ export interface GameEntry {
 // 1. Nim, then two games that turn into Nim with a simple formula (Silver Dollar, Wythoff's Nim).
 // 2. Games whose positions can be computed, though a closed formula for each value is less
 //    obvious (Kayles, Grundy's Game, Chomp).
-// 3. Misère play, where the last move loses (Misère Nim, to come, then NoTakTo).
+// 3. Misère play, where the last move loses (Misère Nim, then NoTakTo).
 export const games: GameEntry[] = [
   {
     title: 'Nim',
@@ -60,6 +60,13 @@ export const games: GameEntry[] = [
     description:
       'Take turns biting a chocolate bar: each bite eats a square and everything above it and to its right. Eat the last good square and leave your opponent the poisoned one.',
     tags: ['vs. computer', 'Strategy stealing'],
+  },
+  {
+    title: 'Misère Nim',
+    href: '/misere-nim/',
+    description:
+      'Nim turned upside down: whoever takes the last stone loses. The Nim strategy still works, right up until the very end. Find the one moment where it changes.',
+    tags: ['vs. computer', 'Misère play'],
   },
   {
     title: 'NoTakTo',

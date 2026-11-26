@@ -27,8 +27,7 @@ export interface NextGame {
 
 /**
  * The game to suggest when each game ends: the same order as the front page.
- * Nim → Silver Dollar → Wythoff's Nim → Kayles → Grundy's Game → Chomp → NoTakTo → Nim.
- * (Misère Nim will go between Chomp and NoTakTo once it exists.)
+ * Nim → Silver Dollar → Wythoff's Nim → Kayles → Grundy's Game → Chomp → Misère Nim → NoTakTo → Nim.
  */
 export const NEXT_GAME: Record<string, NextGame> = {
   nim: { title: 'Silver Dollar Game', href: '/silver/', pitch: 'Slide coins, and watch the gaps turn into Nim piles.' },
@@ -36,7 +35,8 @@ export const NEXT_GAME: Record<string, NextGame> = {
   wythoff: { title: 'Kayles', href: '/kayles/', pitch: 'Knock down pins: each run of pins has its own Nim value.' },
   kayles: { title: "Grundy's Game", href: '/grundy/', pitch: 'Simple rules, and nobody knows whether its values ever repeat.' },
   grundy: { title: 'Chomp', href: '/chomp/', pitch: "Eat the chocolate bar, but don't take the poisoned square." },
-  chomp: { title: 'NoTakTo', href: '/notakto/', pitch: 'Tic-tac-toe where both players are X, and the last move loses.' },
+  chomp: { title: 'Misère Nim', href: '/misere-nim/', pitch: 'Nim where taking the last stone loses. What changes?' },
+  'misere-nim': { title: 'NoTakTo', href: '/notakto/', pitch: 'Tic-tac-toe where both players are X, and the last move loses.' },
   notakto: { title: 'Nim', href: '/nim/', pitch: 'The classic: learn the strategy behind many of these games.' },
 };
 

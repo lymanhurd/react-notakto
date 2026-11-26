@@ -4,7 +4,9 @@ import {
   clusters,
   computerMove,
   CLUSTER_SIZES,
-  isBalanced,
+  isSafe,
+  MISERE_PRESETS,
+  onlySingles,
   isGameOver,
   MAX_ROW,
   MAX_ROWS,
@@ -13,7 +15,7 @@ import {
   randomRows,
   winningMoves,
 } from './logic';
-import type { Move, Rows } from './logic';
+import type { Move, Preset, Rows } from './logic';
 import { BalanceTally, CopyLinkButton, NextSteps } from '../shared/GameParts';
 import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
@@ -23,8 +25,6 @@ type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
 
 const COMPUTER_DELAY_MS = 900;
-const STATS_KEY = 'nimStats';
-const PREFS_KEY = 'nimPrefs';
 
 interface Stats {
   humanWins: number;
@@ -39,12 +39,12 @@ interface Prefs {
 const fmt = (rows: Rows) => `(${rows.join(', ')})`;
 
 /** A link like ?rows=4,6,7 sets the starting board; otherwise the first preset. */
-const linkedRows = (): Rows => listParam('rows', 1, MAX_ROW, MAX_ROWS) ?? PRESETS[0].rows;
+const linkedRows = (presets: Preset[]): Rows => listParam('rows', 1, MAX_ROW, MAX_ROWS) ?? presets[0].rows;
 
 /** After a win: the next preset in the packet's order, or a random board after the last one. */
-function harderBoard(start: Rows): { label: string; rows: Rows | null } {
-  const i = PRESETS.findIndex(p => fmt(p.rows) === fmt(start));
-  const next = i >= 0 ? PRESETS[i + 1] : undefined;
+function harderBoard(presets: Preset[], start: Rows): { label: string; rows: Rows | null } {
+  const i = presets.findIndex(p => fmt(p.rows) === fmt(start));
+  const next = i >= 0 ? presets[i + 1] : undefined;
   return next
     ? { label: `Next: ${next.label} ${fmt(next.rows)}`, rows: next.rows }
     : { label: 'Try a random board', rows: null };
@@ -133,8 +133,16 @@ function NimBoard({
 
 // ---- Game -------------------------------------------------------
 
-export default function NimGame() {
-  const [startRows, setStartRows] = useState<Rows>(linkedRows);
+/**
+ * Nim against the computer. With `misere`, whoever takes the last stone loses
+ * (Misère Nim); the board, tally and hints are the same, but the endgame changes.
+ */
+export default function NimGame({ misere = false }: { misere?: boolean }) {
+  const game = misere ? 'misere-nim' : 'nim';
+  const presets = misere ? MISERE_PRESETS : PRESETS;
+  const STATS_KEY = misere ? 'misereNimStats' : 'nimStats';
+  const PREFS_KEY = misere ? 'misereNimPrefs' : 'nimPrefs';
+  const [startRows, setStartRows] = useState<Rows>(() => linkedRows(presets));
   const [rows, setRows] = useState<Rows>(startRows);
   const [phase, setPhase] = useState<Phase>('setup');
   const [turn, setTurn] = useState<Player>('human');
@@ -149,30 +157,31 @@ export default function NimGame() {
   const [stats, setStats] = useState<Stats>(() => load(STATS_KEY, { humanWins: 0, computerWins: 0 }));
   const [prefs, setPrefs] = useState<Prefs>(() => load(PREFS_KEY, { showClusters: true, showTally: true }));
 
-  useEffect(() => save(STATS_KEY, stats), [stats]);
-  useEffect(() => save(PREFS_KEY, prefs), [prefs]);
+  useEffect(() => save(STATS_KEY, stats), [STATS_KEY, stats]);
+  useEffect(() => save(PREFS_KEY, prefs), [PREFS_KEY, prefs]);
 
   /** Apply a move for `who`, then hand the turn over or end the game. */
   function play(who: Player, move: Move) {
-    if (who === 'human' && phase === 'setup') trackGameStart('nim', 'human', fmt(rows));
+    if (who === 'human' && phase === 'setup') trackGameStart(game, 'human', fmt(rows));
     const next = applyMove(rows, move);
     setRows(next);
     setSelection(null);
     setHover(null);
     setHint(null);
     if (isGameOver(next)) {
-      // Normal play: whoever takes the last stone wins.
+      // Normal play: whoever takes the last stone wins. Misère: they lose.
+      const won: Player = misere ? (who === 'human' ? 'computer' : 'human') : who;
       setPhase('over');
-      setWinner(who);
-      trackGameEnd('nim', who);
-      setStats(s => (who === 'human'
+      setWinner(won);
+      trackGameEnd(game, won);
+      setStats(s => (won === 'human'
         ? { ...s, humanWins: s.humanWins + 1 }
         : { ...s, computerWins: s.computerWins + 1 }));
     } else {
       setPhase('playing');
       if (who === 'human') {
         setTurn('computer');
-        setPending(computerMove(next));
+        setPending(computerMove(next, Math.random, misere));
       } else {
         setTurn('human');
       }
@@ -220,14 +229,14 @@ export default function NimGame() {
   }
 
   function computerFirst() {
-    trackGameStart('nim', 'computer', fmt(rows));
+    trackGameStart(game, 'computer', fmt(rows));
     setPhase('playing');
     setTurn('computer');
-    setPending(computerMove(rows));
+    setPending(computerMove(rows, Math.random, misere));
   }
 
   function showHint() {
-    const moves = winningMoves(rows);
+    const moves = winningMoves(rows, misere);
     setHint(moves.length > 0 ? moves[0] : 'balanced');
     setSelection(null);
   }
@@ -257,8 +266,10 @@ export default function NimGame() {
   } else if (selection) {
     prompt = `Take ${selection.take} ${stonesWord(selection.take)} from row ${selection.row + 1}? Click the stone again or press Take.`;
   } else if (phase === 'setup') {
-    prompt = isBalanced(rows)
-      ? 'This board is Balanced, so the player who moves second can always win. Let the computer go first!'
+    prompt = isSafe(rows, misere)
+      ? misere && onlySingles(rows)
+        ? 'An odd number of single stones: whoever moves first must take the last one. Let the computer go first!'
+        : 'This board is Balanced, so the player who moves second can always win. Let the computer go first!'
       : 'Click a stone to move first: you take it and every stone to its right. Or let the computer start.';
   } else if (lastComputerMove) {
     prompt = `The computer took ${lastComputerMove.take} ${stonesWord(lastComputerMove.take)} from row ${lastComputerMove.row + 1}. Your move.`;
@@ -269,7 +280,7 @@ export default function NimGame() {
   return (
     <div className="nim">
       <header className="game-header">
-        <h1>Nim</h1>
+        <h1>{misere ? 'Misère Nim' : 'Nim'}</h1>
         <div className="scoreboard" aria-live="polite">
           <div className="score">
             <span className="score-label">Human</span>
@@ -284,7 +295,7 @@ export default function NimGame() {
 
       <section className="play-setup" aria-label="Choose a starting board">
         <div className="preset-list">
-          {PRESETS.map(p => {
+          {presets.map(p => {
             const active = fmt(p.rows) === fmt(startRows);
             return (
               <button
@@ -383,32 +394,41 @@ export default function NimGame() {
         <div className={`result-banner ${winner === 'human' ? 'win' : 'loss'}`} role="status">
           <strong>{winner === 'human' ? 'You won!' : 'The computer won.'}</strong>
           <span>
-            {winner === 'human'
-              ? 'You took the last stone.'
-              : 'It took the last stone. Try handing it a Balanced board!'}
+            {misere
+              ? winner === 'human'
+                ? 'The computer had to take the last stone.'
+                : 'You had to take the last stone. At the end, leave an odd number of single stones!'
+              : winner === 'human'
+                ? 'You took the last stone.'
+                : 'It took the last stone. Try handing it a Balanced board!'}
           </span>
         </div>
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {phase === 'over' && (() => {
-        const next = harderBoard(startRows);
+        const next = harderBoard(presets, startRows);
         return (
-          <NextSteps game="nim" winner={winner} strategyHref="#strategy"
+          <NextSteps game={game} winner={winner} strategyHref="#strategy"
             harder={{ label: next.label, onClick: () => chooseBoard(next.rows ?? randomRows()) }} />
         );
       })()}
 
       {hint === 'balanced' && (
         <p className="hint-note">
-          The board is <strong>Balanced</strong>, so there is no winning move right now. Take a single
-          stone and wait for a chance to rebalance.
+          {misere && onlySingles(rows)
+            ? <>There is an odd number of single stones, so there is no winning move: you will have to take
+              the last one if the computer plays well.</>
+            : <>The board is <strong>Balanced</strong>, so there is no winning move right now. Take a single
+              stone and wait for a chance to rebalance.</>}
         </p>
       )}
       {hint && hint !== 'balanced' && (
         <p className="hint-note">
-          Hint: take <strong>{hint.take} {stonesWord(hint.take)} from row {hint.row + 1}</strong> to leave a
-          Balanced board{prefs.showClusters ? ' (the glowing stones)' : ''}.
+          Hint: take <strong>{hint.take} {stonesWord(hint.take)} from row {hint.row + 1}</strong> to leave{' '}
+          {misere && onlySingles(applyMove(rows, hint))
+            ? 'an odd number of single stones'
+            : 'a Balanced board'}{prefs.showClusters ? ' (the glowing stones)' : ''}.
         </p>
       )}
 
@@ -424,21 +444,43 @@ export default function NimGame() {
           onHover={setHover}
           onPick={pick}
         />
-        {prefs.showTally && <BalanceTally values={rows} sizes={sizes} />}
+        {prefs.showTally && (
+          <BalanceTally values={rows} sizes={sizes} note={misere
+            ? 'Aim for Balanced, until only single stones would be left: then leave an odd number of them.'
+            : undefined} />
+        )}
       </div>
 
+      {misere && (
+        <section className="rules-card">
+          <h2>Misère play</h2>
+          <ul className="rules">
+            <li>Same board, same moves as Nim, but whoever takes the <strong>last stone loses</strong>.</li>
+            <li>
+              Surprisingly, the strategy barely changes. Keep handing the computer a <strong>Balanced</strong> board,
+              exactly as in Nim, while some row still has 2 or more stones.
+            </li>
+            <li>
+              The twist comes at the very end. When your move would leave only rows of single stones, leave an{' '}
+              <strong>odd</strong> number of them (Balanced would leave an even number). Then the computer is the one
+              forced to take the last stone. Try the board (1, 1, 3): normal Nim takes all 3, misère takes 2.
+            </li>
+          </ul>
+        </section>
+      )}
+
       <section id="strategy" className="rules-card">
-        <h2>How to play</h2>
+        <h2>{misere ? 'The Nim strategy' : 'How to play'}</h2>
         <ul className="rules">
           <li>On your turn, choose <strong>one row</strong> and take as many stones as you like from it (at least one).</li>
-          <li>Whoever takes the <strong>very last stone wins</strong>.</li>
+          {!misere && <li>Whoever takes the <strong>very last stone wins</strong>.</li>}
           <li>
             Each row is grouped into power-of-two <strong>clusters</strong> (8, 4, 2, 1), biggest first.
             A board is <strong>Balanced</strong> when every cluster size appears an even number of times.
           </li>
           <li>
-            The winning strategy: always hand your opponent a Balanced board. Find the largest odd cluster
-            size, then take stones from a row containing it so every tally becomes even.
+            The winning strategy: always hand your opponent a Balanced board{misere ? ' (until the misère endgame)' : ''}.
+            Find the largest odd cluster size, then take stones from a row containing it so every tally becomes even.
           </li>
         </ul>
       </section>
