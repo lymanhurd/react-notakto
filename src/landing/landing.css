@@ -389,3 +389,68 @@ a.game-card:hover .play span {
 .contact :focus-visible {
   outline-color: var(--brand-gold);
 }
+
+/* ---- Welcome (optional name, kept on this device) ------------- */
+
+.welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin: 0 0 28px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.welcome-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.welcome-form label {
+  font-weight: 600;
+}
+
+.welcome-form input {
+  width: 14em;
+  max-width: 100%;
+  padding: 6px 10px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.welcome-form input:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.welcome-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.welcome-greeting {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.welcome-link {
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}

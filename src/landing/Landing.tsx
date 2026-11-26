@@ -2,6 +2,7 @@ import '../shared/theme.css';
 import './landing.css';
 import { games } from './games';
 import SiteFooter from '../shared/SiteFooter';
+import Welcome from './Welcome';
 import { CONTACT_EMAIL, STORE_URL, contactClickAttrs, storeClickAttrs } from '../shared/links';
 
 const Landing = () => (
@@ -36,6 +37,7 @@ const Landing = () => (
 
     <div className="page landing">
       <main>
+        <Welcome />
         <section id="games" aria-labelledby="games-heading">
           <p className="eyebrow">Play free, right in your browser</p>
           <h2 id="games-heading" className="section-heading">The games</h2>
