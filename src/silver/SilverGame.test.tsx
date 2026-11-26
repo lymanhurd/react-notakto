@@ -11,6 +11,7 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.restoreAllMocks()
+  window.history.pushState({}, '', '/')
 })
 
 /** Squares (1-based) that hold a coin. */
@@ -19,10 +20,13 @@ const coinSquares = () =>
     Number(c.getAttribute('aria-label')!.match(/square (\d+)/)![1]))
 const status = () => screen.getByRole('status').textContent ?? ''
 
-/** Start with 2 coins on 6 squares; with Math.random fixed at 0.5 they land on squares 1 and 6. */
+/**
+ * Start with 2 coins on squares 1 and 6 of 6. Random starts never put a coin beside the star,
+ * so this position comes from a link (explicit setups may have empty gaps).
+ */
 function renderTwoCoins(showGaps = false) {
   localStorage.setItem('silverPrefs', JSON.stringify({ coins: 2, squares: 6, showGaps, showTally: true }))
-  vi.spyOn(Math, 'random').mockReturnValue(0.5)
+  window.history.pushState({}, '', '/silver/?coins=1,6&squares=6')
   render(<SilverGame />)
 }
 
@@ -88,5 +92,21 @@ describe('SilverGame', () => {
     expect(coinSquares()).toHaveLength(3)
     fireEvent.click(screen.getByRole('button', { name: 'Shuffle' }))
     expect(coinSquares()).toHaveLength(3)
+  })
+
+  it('random starts leave a gap in front of every coin, with enough squares for it', () => {
+    localStorage.setItem('silverPrefs', JSON.stringify({ coins: 4, squares: 5, showGaps: false, showTally: true }))
+    render(<SilverGame />)
+    // Saved settings with too few squares are widened to 2 per coin.
+    expect(screen.getByText('8 squares')).toBeDefined()
+    expect((screen.getByRole('button', { name: 'Fewer squares' }) as HTMLButtonElement).disabled).toBe(true)
+    for (let i = 0; i < 20; i++) {
+      fireEvent.click(screen.getByRole('button', { name: 'Shuffle' }))
+      const squares = coinSquares()
+      expect(squares[0]).toBeGreaterThanOrEqual(2)
+      for (let k = 1; k < squares.length; k++) expect(squares[k] - squares[k - 1]).toBeGreaterThanOrEqual(2)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'More coins' }))
+    expect(screen.getByText('10 squares')).toBeDefined()
   })
 })

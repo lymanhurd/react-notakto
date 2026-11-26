@@ -7,6 +7,7 @@ import {
   legalMoves,
   pairs,
   piles,
+  minSquares,
   randomCoins,
   winningMoves,
 } from './logic'
@@ -85,5 +86,28 @@ describe('strategy', () => {
       expect(coins.every(c => c >= 0 && c < 12)).toBe(true)
       expect(isGameOver(coins)).toBe(false)
     }
+  })
+
+  it('random arrangements leave a gap in front of every coin', () => {
+    let seed = 7
+    const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+    const seen = new Set<string>()
+    for (let i = 0; i < 500; i++) {
+      const count = 1 + (i % 8)
+      const squares = minSquares(count) + (i % 5)
+      const coins = randomCoins(count, squares, random)
+      expect(coins).toHaveLength(count)
+      expect(coins[0]).toBeGreaterThanOrEqual(1)
+      expect(coins[count - 1]).toBeLessThan(squares)
+      for (let k = 1; k < count; k++) expect(coins[k] - coins[k - 1]).toBeGreaterThanOrEqual(2)
+      expect(piles(coins).every(g => g >= 1)).toBe(true)
+      if (count === 2 && squares === 5) seen.add(coins.join(','))
+    }
+    // On 5 squares, 2 coins can sit at (1,3), (1,4) or (2,4): every one turns up.
+    expect([...seen].sort()).toEqual(['1,3', '1,4', '2,4'])
+  })
+
+  it('fits the coins exactly when squares are tight', () => {
+    expect(randomCoins(3, minSquares(3))).toEqual([1, 3, 5])
   })
 })

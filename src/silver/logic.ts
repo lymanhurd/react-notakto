@@ -95,16 +95,35 @@ export function computerMove(coins: Coins, random: () => number = Math.random): 
   return small.length > 0 ? small[Math.floor(random() * small.length)] : null;
 }
 
-/** Random arrangement of `count` coins on `squares` squares that isn't already finished. */
+/** Fewest squares that fit `count` coins with an empty square in front of every coin. */
+export function minSquares(count: number): number {
+  return 2 * count;
+}
+
+/**
+ * Random starting arrangement of `count` coins on `squares` squares with no empty gaps:
+ * no coin sits right beside the star, and no two coins are side by side, so every coin
+ * can move. All such arrangements are equally likely. Needs squares >= minSquares(count);
+ * with fewer squares it places the coins at random without that guarantee.
+ * (Positions set up by a link may still have empty gaps.)
+ */
 export function randomCoins(count: number, squares: number, random: () => number = Math.random): Coins {
-  if (squares <= count) return Array.from({ length: count }, (_, i) => i);
-  for (;;) {
-    const cells = Array.from({ length: squares }, (_, i) => i);
+  const shuffled = (n: number) => {
+    const cells = Array.from({ length: n }, (_, i) => i);
     for (let i = cells.length - 1; i > 0; i--) {
       const j = Math.floor(random() * (i + 1));
       [cells[i], cells[j]] = [cells[j], cells[i]];
     }
-    const coins = cells.slice(0, count).sort((a, b) => a - b);
+    return cells;
+  };
+  if (squares >= minSquares(count)) {
+    // Choose `count` of the first squares - count slots, then spread them out:
+    // the i-th coin moves i + 1 squares further, leaving a square in front of each coin.
+    return shuffled(squares - count).slice(0, count).sort((a, b) => a - b).map((r, i) => r + i + 1);
+  }
+  if (squares <= count) return Array.from({ length: count }, (_, i) => i);
+  for (;;) {
+    const coins = shuffled(squares).slice(0, count).sort((a, b) => a - b);
     if (!isGameOver(coins)) return coins;
   }
 }

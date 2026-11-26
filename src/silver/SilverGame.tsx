@@ -9,6 +9,7 @@ import {
   MIN_COINS,
   pairs,
   piles,
+  minSquares,
   randomCoins,
   winningMoves,
 } from './logic';
@@ -50,7 +51,9 @@ export default function SilverGame() {
   const [link] = useState(linkedStart);
   const [prefs, setPrefsState] = useState<Prefs>(() => {
     const saved = load(PREFS_KEY, { coins: 4, squares: 12, showGaps: false, showTally: true });
-    return link ? { ...saved, coins: link.coins.length, squares: link.squares } : saved;
+    if (link) return { ...saved, coins: link.coins.length, squares: link.squares };
+    // Random starts need room for an empty square in front of every coin.
+    return { ...saved, squares: Math.min(MAX_SQUARES, Math.max(saved.squares, minSquares(saved.coins))) };
   });
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
@@ -86,7 +89,7 @@ export default function SilverGame() {
 
   function newArrangement(next: Partial<Prefs> = {}) {
     const p = { ...prefs, ...next };
-    p.squares = Math.max(p.squares, p.coins + 1);
+    p.squares = Math.min(MAX_SQUARES, Math.max(p.squares, minSquares(p.coins)));
     setPrefs(p);
     setSelected(null);
     setHint(null);
@@ -208,7 +211,7 @@ export default function SilverGame() {
             </span>
             <span className="size-stepper" aria-label="Number of squares">
               <button type="button" className="btn-theme" aria-label="Fewer squares"
-                disabled={prefs.squares <= prefs.coins + 1} onClick={() => newArrangement({ squares: prefs.squares - 1 })}>−</button>
+                disabled={prefs.squares <= minSquares(prefs.coins)} onClick={() => newArrangement({ squares: prefs.squares - 1 })}>−</button>
               <span className="size-value">{prefs.squares} squares</span>
               <button type="button" className="btn-theme" aria-label="More squares"
                 disabled={prefs.squares >= MAX_SQUARES} onClick={() => newArrangement({ squares: prefs.squares + 1 })}>+</button>
