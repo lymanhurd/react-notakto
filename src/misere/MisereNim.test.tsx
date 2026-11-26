@@ -54,3 +54,13 @@ describe('Misère Nim', () => {
     expect(screen.getByText(/an odd number of single stones/)).toBeDefined()
   })
 })
+
+describe('cluster tooltips', () => {
+  it('only name the cluster sizes when clusters are shown', () => {
+    window.history.pushState({}, '', '/nim/?rows=5')
+    render(<NimGame />)
+    expect(document.querySelectorAll('[title$="-cluster"]')).toHaveLength(2)
+    fireEvent.click(screen.getByLabelText('Show clusters'))
+    expect(document.querySelectorAll('[title$="-cluster"]')).toHaveLength(0)
+  })
+})

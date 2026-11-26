@@ -101,7 +101,8 @@ function NimBoard({
             </div>
             <div className="nim-stones">
               {groups.map(({ size, start }) => (
-                <span key={start} className={`nim-cluster c${size}`} title={`${size}-cluster`}>
+                <span key={start} className={`nim-cluster c${size}`}
+                  title={showClusters ? `${size}-cluster` : undefined}>
                   {Array.from({ length: size }, (_, k) => {
                     const i = start + k;
                     const take = n - i;
