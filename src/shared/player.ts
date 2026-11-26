@@ -74,3 +74,12 @@ export function totalWins(): number {
   const notakto = wins(read('notaktoSession'), o => (o.stats as Record<string, unknown> | undefined)?.humanWins);
   return games + notakto;
 }
+
+/** Remove everything this site has saved in this browser: name, scores, settings, saved games. */
+export function clearEverything(): void {
+  try {
+    localStorage.clear();
+  } catch {
+    // Nothing to clear if storage is unavailable.
+  }
+}

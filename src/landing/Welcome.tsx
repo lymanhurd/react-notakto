@@ -51,7 +51,10 @@ export default function Welcome() {
             No thanks
           </button>
         </form>
-        <p className="welcome-note">Optional. Your name stays on this device and is never sent anywhere.</p>
+        <p className="welcome-note">
+          Optional. Your name stays on this device and is never sent anywhere. No cookies.{' '}
+          <a href="/privacy/">Privacy</a>
+        </p>
       </section>
     );
   }

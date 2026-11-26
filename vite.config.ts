@@ -77,6 +77,7 @@ export default defineConfig({
         silver: resolve(__dirname, 'silver/index.html'),
         wythoff: resolve(__dirname, 'wythoff/index.html'),
         misere: resolve(__dirname, 'misere-nim/index.html'),
+        privacy: resolve(__dirname, 'privacy/index.html'),
         chomp: resolve(__dirname, 'chomp/index.html'),
       },
     },

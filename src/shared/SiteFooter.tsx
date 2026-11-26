@@ -35,6 +35,7 @@ const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
         <a href="/#games">Games</a>
         <a href="/#about">About</a>
         <a href={`mailto:${CONTACT_EMAIL}`} {...contactClickAttrs(`footer:${pageName()}`)}>Contact</a>
+        <a href="/privacy/">Privacy</a>
       </nav>
       <VersionInfo />
     </footer>
