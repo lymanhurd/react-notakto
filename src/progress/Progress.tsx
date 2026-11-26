@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { games } from '../landing/games';
 import { getName, readRecord } from '../shared/player';
+import { currentStreak, DAILY_KEY, dateKey, EMPTY_RECORD } from '../daily/logic';
+import { load } from '../shared/storage';
 
 /**
  * The player's record in every game on this device: wins, wins without help and
@@ -9,6 +11,10 @@ import { getName, readRecord } from '../shared/player';
 export default function Progress() {
   const [name] = useState(getName);
   const [rows] = useState(() => games.map(g => ({ game: g, record: readRecord(g.statsKey) })));
+  const [daily] = useState(() => {
+    const record = load(DAILY_KEY, EMPTY_RECORD);
+    return { streak: currentStreak(record, dateKey()), best: record.best };
+  });
 
   const played = rows.filter(r => r.record.wins + r.record.losses > 0);
   const wins = rows.reduce((n, r) => n + r.record.wins, 0);
@@ -27,6 +33,15 @@ export default function Progress() {
               {wins > 0 && <>, <strong>{clean}</strong> of them without help</>}.
               {untried.length > 0 && <> Still to try: {untried.map(r => r.game.title).join(', ')}.</>}
             </>}
+      </p>
+
+      <p className="progress-daily">
+        <a href="/daily/">Daily Challenge</a>:{' '}
+        {daily.streak > 0
+          ? <>current streak <strong>{daily.streak} {daily.streak === 1 ? 'day' : 'days'}</strong>, best {daily.best}.</>
+          : daily.best > 0
+            ? <>no streak right now (best {daily.best}). Solve today's puzzle to start a new one.</>
+            : <>solve today's puzzle to start a streak.</>}
       </p>
 
       <div className="progress-table-wrap">

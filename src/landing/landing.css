@@ -454,3 +454,36 @@ a.game-card:hover .play span {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* ---- Daily Challenge teaser ------------------------------------ */
+
+.daily-teaser {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 28px;
+  margin: 0 0 32px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--last);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.daily-teaser.solved {
+  border-left-color: var(--accent);
+}
+
+.daily-teaser h2 {
+  margin: 0 0 4px;
+}
+
+.daily-teaser p {
+  margin: 0;
+}
+
+.daily-teaser .eyebrow {
+  margin-bottom: 2px;
+}

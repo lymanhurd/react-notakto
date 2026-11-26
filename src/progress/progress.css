@@ -127,3 +127,11 @@
     display: none;
   }
 }
+
+.progress-daily {
+  margin: -8px 0 20px;
+}
+
+.progress-daily a {
+  font-weight: 700;
+}

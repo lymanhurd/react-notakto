@@ -79,6 +79,7 @@ export default defineConfig({
         misere: resolve(__dirname, 'misere-nim/index.html'),
         privacy: resolve(__dirname, 'privacy/index.html'),
         progress: resolve(__dirname, 'progress/index.html'),
+        daily: resolve(__dirname, 'daily/index.html'),
         chomp: resolve(__dirname, 'chomp/index.html'),
       },
     },

@@ -1,0 +1,124 @@
+/* Daily Challenge page. Stone styles come from src/nim/nim.css. */
+
+.daily-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px 24px;
+  margin-bottom: 12px;
+}
+
+.daily-header h1 {
+  margin: 0;
+}
+
+.daily-header .eyebrow {
+  margin: 0 0 2px;
+}
+
+.daily-date {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.daily-streak {
+  display: flex;
+  gap: 10px;
+}
+
+.daily-rules {
+  max-width: 68ch;
+  margin: 0 0 14px;
+}
+
+.daily-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 16px;
+}
+
+.daily-board.done .nim-stone {
+  cursor: default;
+}
+
+.daily-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: calc(var(--stone) + 8px);
+}
+
+.daily-row-label {
+  flex: 0 0 6.5rem;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-weight: 600;
+}
+
+.daily-row-count {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-stones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stone-gap);
+}
+
+.daily-stones.row-0 .nim-stone {
+  --c: var(--c4);
+}
+
+.daily-stones.row-1 .nim-stone {
+  --c: var(--c2);
+}
+
+.daily-empty {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.daily-both {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.daily-both input {
+  width: 1.1em;
+  height: 1.1em;
+  accent-color: var(--accent);
+}
+
+.daily-actions {
+  align-items: center;
+}
+
+.daily-practice {
+  font-weight: 600;
+}
+
+.daily-note {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .daily-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .daily-row-label {
+    flex-basis: auto;
+  }
+}

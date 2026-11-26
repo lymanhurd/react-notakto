@@ -27,7 +27,7 @@ export default function Privacy() {
         <p>
           If you tell the front page your name, and as you play, your browser saves a few things in its own
           storage on your device: your name (if you gave one), your win/loss record, your settings for each game,
-          and an unfinished NoTakTo game. This is how the site welcomes you back and remembers your score.
+          your Daily Challenge streak, and an unfinished NoTakTo game. This is how the site welcomes you back and remembers your score.
         </p>
         <p>
           None of it is sent to us or anyone else. Someone using a different computer or browser won't see it,
