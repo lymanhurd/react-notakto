@@ -68,6 +68,7 @@ export default function SilverGame() {
     statsKey: 'silverStats',
     game: 'silver',
     describeStart: c => `${c.length} coins / ${prefs.squares} squares`,
+    helpersOn: prefs.showGaps,
   });
   const coins = game.state;
 
@@ -119,6 +120,7 @@ export default function SilverGame() {
   }
 
   function showHint() {
+    game.markHint();
     const wins = winningMoves(coins);
     setSelected(null);
     setHint(wins.length > 0 ? wins[0] : 'balanced');
@@ -252,7 +254,7 @@ export default function SilverGame() {
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {game.phase === 'over' && (
-        <NextSteps game="silver" winner={game.winner} strategyHref="#strategy"
+        <NextSteps game="silver" winner={game.winner} helped={game.helpedWin} strategyHref="#strategy"
           harder={prefs.coins < MAX_COINS
             ? { label: `Try ${prefs.coins + 1} coins`, onClick: () => newArrangement({ coins: prefs.coins + 1 }) }
             : undefined} />

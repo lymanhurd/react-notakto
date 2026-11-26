@@ -32,6 +32,8 @@ interface PersistedSession {
   gameState: Partial<GameState>;
   stats: GameStats;
   boards: BoardString[];
+  /** Hint was pressed during the game on screen (so a win doesn't count as "without help"). */
+  hintUsed?: boolean;
 }
 
 // ---- Canvas helpers ------------------------------------
@@ -278,6 +280,7 @@ const loadSession = (): PersistedSession => {
       gameState: saved.gameState ?? {},
       stats: saved.stats ?? INITIAL_STATS,
       boards: saved.boards ?? INITIAL_BOARDS,
+      hintUsed: saved.hintUsed === true,
     };
   } catch {
     return { gameState: {}, stats: INITIAL_STATS, boards: INITIAL_BOARDS };
@@ -287,9 +290,10 @@ const loadSession = (): PersistedSession => {
 const saveSession = (
   boards: BoardString[],
   stats: GameStats,
-  lastWinner: Player | null
+  lastWinner: Player | null,
+  hintUsed: boolean
 ): void => {
-  const session: PersistedSession = { gameState: { lastWinner }, stats, boards };
+  const session: PersistedSession = { gameState: { lastWinner }, stats, boards, hintUsed };
   try {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch {
@@ -316,9 +320,12 @@ export default function Game() {
     return linkedBoards ? null : loadSession().gameState.lastWinner ?? null;
   });
 
+  // Hint pressed during this game: a win then doesn't count as "without help".
+  const [hintUsed, setHintUsed] = useState(() => (linkedBoards ? false : loadSession().hintUsed === true));
+
   useEffect(() => {
-    saveSession(boards, stats, lastWinner);
-  }, [boards, stats, lastWinner]);
+    saveSession(boards, stats, lastWinner, hintUsed);
+  }, [boards, stats, lastWinner, hintUsed]);
 
   // The current hint: the winning squares, or 'none'. It clears itself after a few seconds.
   const [hint, setHint] = useState<{ moves: { board: number; square: number }[] } | null>(null);
@@ -329,6 +336,7 @@ export default function Game() {
   }, [hint]);
 
   function showHint() {
+    setHintUsed(true);
     setHint({ moves: winningMoves(boards) });
   }
 
@@ -340,11 +348,13 @@ export default function Game() {
   const waitingForStart = atStart && !humanMovesFirst;
 
   function handlePlus() {
+    setHintUsed(false);
     setBoards(prev => [...prev, '---------']);
   }
 
   function handleMinus() {
     if (boards.length > 1) {
+      setHintUsed(false);
       setBoards(prev => prev.slice(0, -1));
     }
   }
@@ -360,6 +370,7 @@ export default function Game() {
 
   function handleQuit() {
     setHint(null);
+    setHintUsed(false);
     // Quitting mid-game counts as a computer win; "Play Again" after a finished game doesn't.
     if (!isGameOver(boards) && !isStart(boards)) trackGameEnd('notakto', 'computer', true);
     const newBoards: BoardString[] = new Array(boards.length).fill('---------');
@@ -403,7 +414,11 @@ export default function Game() {
       setBoards(newBoards);
       setLastWinner('human');
       trackGameEnd('notakto', 'human');
-      setStats(prev => ({ ...prev, humanWins: prev.humanWins + 1 }));
+      setStats(prev => ({
+        ...prev,
+        humanWins: prev.humanWins + 1,
+        cleanWins: (prev.cleanWins ?? 0) + (hintUsed ? 0 : 1),
+      }));
       return;
     }
 
@@ -463,13 +478,14 @@ export default function Game() {
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {gameOver && (
-        <NextSteps game="notakto" winner={lastWinner} strategyHref="/discussion.html"
+        <NextSteps game="notakto" winner={lastWinner} helped={hintUsed} strategyHref="/discussion.html"
           harder={boards.length < MAX_LINKED_BOARDS ? {
             label: `Try ${boards.length + 1} boards`,
             onClick: () => {
               setBoards(new Array(boards.length + 1).fill('---------'));
               setLastWinner(null);
               setHint(null);
+              setHintUsed(false);
             },
           } : undefined} />
       )}

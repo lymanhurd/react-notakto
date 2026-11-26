@@ -55,6 +55,8 @@ export default function WythoffGame() {
     statsKey: 'wythoffStats',
     game: 'wythoff',
     describeStart: fmt,
+    // The marked squares only show on the grid.
+    helpersOn: prefs.marked && prefs.view !== 'piles',
   });
   const pos = game.state;
 
@@ -82,6 +84,7 @@ export default function WythoffGame() {
   }
 
   function showHint() {
+    game.markHint();
     const wins = winningMoves(pos);
     setHint(wins.length > 0 ? wins[0] : 'none');
   }
@@ -323,7 +326,7 @@ export default function WythoffGame() {
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {game.phase === 'over' && (
-        <NextSteps game="wythoff" winner={game.winner}
+        <NextSteps game="wythoff" winner={game.winner} helped={game.helpedWin}
           harder={{ label: 'Try a random start', onClick: () => restart(randomStart()) }} />
       )}
       {hint === 'none' && (

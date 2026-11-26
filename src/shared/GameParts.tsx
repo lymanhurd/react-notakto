@@ -9,6 +9,8 @@ export type Player = 'human' | 'computer';
 export interface Stats {
   humanWins: number;
   computerWins: number;
+  /** Wins with no Hint and no helper views switched on (missing in scores saved before this existed). */
+  cleanWins?: number;
 }
 
 export function Scoreboard({ stats }: { stats: Stats }) {
@@ -157,13 +159,21 @@ interface NextStepsProps {
   harder?: { label: string; onClick: () => void };
   /** After a loss: where the strategy is explained (e.g. "#strategy"). */
   strategyHref?: string;
+  /** The win used Hint or a helper view: suggest trying without. */
+  helped?: boolean;
 }
 
 /** What to do after a game ends: a harder setup, the strategy, or the next game on the path. */
-export function NextSteps({ game, winner, harder, strategyHref }: NextStepsProps) {
+export function NextSteps({ game, winner, harder, strategyHref, helped }: NextStepsProps) {
   const next = NEXT_GAME[game];
   return (
     <div className="next-steps">
+      {winner === 'human' && helped && (
+        <p className="next-challenge">
+          That win used help. Next challenge: win with Hint unused and the helper views switched off. It counts
+          as a <a href="/progress/">win without help</a>.
+        </p>
+      )}
       {winner === 'human' && harder && (
         <button type="button" className="btn-theme primary" onClick={harder.onClick} {...nextStepAttrs(game, 'harder')}>
           {harder.label}

@@ -1,0 +1,129 @@
+/* Progress page. Shared styles are in src/shared/theme.css. */
+
+.progress h1 {
+  margin-bottom: 8px;
+}
+
+.progress-summary {
+  max-width: 68ch;
+  margin: 0 0 20px;
+  font-size: 1.05rem;
+}
+
+.progress-table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.progress-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-table th,
+.progress-table td {
+  padding: 12px 14px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.progress-table thead th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.progress-table tbody tr:last-child th,
+.progress-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.progress-table th[scope='row'],
+.progress-table thead th:first-child {
+  text-align: left;
+}
+
+/* The whole row is a link to the game: the title's link stretches over the row. */
+.progress-table tbody tr {
+  position: relative;
+  transition: background 0.12s ease;
+}
+
+.progress-table tbody tr:hover,
+.progress-table tbody tr:focus-within {
+  background: var(--accent-soft);
+}
+
+.progress-game {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.progress-game::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.progress-game:focus-visible {
+  outline: none;
+}
+
+.progress-table tbody tr:focus-within {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+.progress-helpers {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.progress-table td.clean {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.clean-star {
+  color: var(--last);
+}
+
+.progress-go {
+  text-align: right !important;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* Games not tried yet stand out, to invite a first visit. */
+.progress-table tr.untried {
+  background: color-mix(in srgb, var(--last-soft) 60%, transparent);
+}
+
+.progress-new {
+  color: var(--last);
+}
+
+.progress .rules-card p {
+  max-width: 64ch;
+}
+
+@media (max-width: 560px) {
+  .progress-table th,
+  .progress-table td {
+    padding: 10px 8px;
+  }
+  .progress-helpers {
+    display: none;
+  }
+}

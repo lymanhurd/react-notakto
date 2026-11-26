@@ -51,6 +51,7 @@ export default function GrundyGame() {
     statsKey: 'grundyStats',
     game: 'grundy',
     describeStart: g => `${g.reduce((a, b) => a + b, 0)} dots`,
+    helpersOn: prefs.showValues || prefs.showTally,
   });
   const groups = game.state;
 
@@ -70,6 +71,7 @@ export default function GrundyGame() {
   }
 
   function showHint() {
+    game.markHint();
     const wins = winningSplits(groups);
     setHint(wins.length > 0 ? wins[0] : 'balanced');
   }
@@ -153,7 +155,7 @@ export default function GrundyGame() {
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {game.phase === 'over' && (
-        <NextSteps game="grundy" winner={game.winner} strategyHref="#strategy"
+        <NextSteps game="grundy" winner={game.winner} helped={game.helpedWin} strategyHref="#strategy"
           harder={prefs.size < MAX_DOTS ? { label: `Try ${prefs.size + 1} dots`, onClick: () => resize(prefs.size + 1) } : undefined} />
       )}
       {hint === 'balanced' && (

@@ -33,6 +33,7 @@ const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
       </a>
       <nav className="footer-links" aria-label="Site">
         <a href="/#games">Games</a>
+        <a href="/progress/">Progress</a>
         <a href="/#about">About</a>
         <a href={`mailto:${CONTACT_EMAIL}`} {...contactClickAttrs(`footer:${pageName()}`)}>Contact</a>
         <a href="/privacy/">Privacy</a>

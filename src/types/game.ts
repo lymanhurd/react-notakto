@@ -44,6 +44,8 @@ export type Player = 'human' | 'computer';
 export interface GameStats {
   humanWins: number;
   computerWins: number;
+  /** Wins without pressing Hint (missing in scores saved before this existed). */
+  cleanWins?: number;
 }
 
 // ─── Per-game state ───────────────────────────────────────────────────────────

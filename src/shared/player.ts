@@ -7,12 +7,6 @@ const DECLINED_KEY = 'playerNameDeclined';
 /** Longest name we keep. */
 export const MAX_NAME = 20;
 
-/** Stats keys used by the games (NoTakTo keeps its stats inside its saved game). */
-const STATS_KEYS = [
-  'nimStats', 'misereNimStats', 'silverStats', 'wythoffStats',
-  'kaylesStats', 'grundyStats', 'chompStats',
-];
-
 function read(key: string): string | null {
   try {
     return localStorage.getItem(key);
@@ -60,19 +54,34 @@ export function decline(): void {
   write(DECLINED_KEY, 'true');
 }
 
+export interface GameRecord {
+  wins: number;
+  /** Wins with no Hint and no helper views. */
+  cleanWins: number;
+  losses: number;
+}
+
+const count = (n: unknown) => (typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.floor(n) : 0);
+
+/**
+ * A game's record on this device, from its stats key. NoTakTo keeps its score
+ * inside its saved game ("notaktoSession"); the others store it directly.
+ */
+export function readRecord(statsKey: string): GameRecord {
+  try {
+    const raw = read(statsKey);
+    const saved = raw ? JSON.parse(raw) : {};
+    const stats = (statsKey === 'notaktoSession' ? saved?.stats : saved) ?? {};
+    const wins = count(stats.humanWins);
+    return { wins, cleanWins: Math.min(wins, count(stats.cleanWins)), losses: count(stats.computerWins) };
+  } catch {
+    return { wins: 0, cleanWins: 0, losses: 0 };
+  }
+}
+
 /** Games won against the computer, across every game, on this device. */
-export function totalWins(): number {
-  const wins = (raw: string | null, pick: (o: Record<string, unknown>) => unknown) => {
-    try {
-      const n = raw ? pick(JSON.parse(raw)) : 0;
-      return typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : 0;
-    } catch {
-      return 0;
-    }
-  };
-  const games = STATS_KEYS.reduce((sum, k) => sum + wins(read(k), o => o.humanWins), 0);
-  const notakto = wins(read('notaktoSession'), o => (o.stats as Record<string, unknown> | undefined)?.humanWins);
-  return games + notakto;
+export function totalWins(statsKeys: string[]): number {
+  return statsKeys.reduce((sum, key) => sum + readRecord(key).wins, 0);
 }
 
 /** Remove everything this site has saved in this browser: name, scores, settings, saved games. */

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { decline, forgetName, getName, hasDeclined, MAX_NAME, setName, totalWins } from '../shared/player';
+import { games } from './games';
 
 type Mode = 'ask' | 'welcome' | 'hidden';
 
@@ -13,7 +14,7 @@ export default function Welcome() {
   // True right after saving, so we say "nice to meet you" rather than "welcome back".
   const [justMet, setJustMet] = useState(false);
   const [draft, setDraft] = useState('');
-  const [wins] = useState(totalWins);
+  const [wins] = useState(() => totalWins(games.map(g => g.statsKey)));
 
   function save(e: React.FormEvent) {
     e.preventDefault();
@@ -67,6 +68,7 @@ export default function Welcome() {
           <> You've beaten the computer {wins === 1 ? 'once' : `${wins} times`} so far.</>
         )}
       </p>
+      <a className="welcome-link" href="/progress/">See your progress</a>
       <button type="button" className="welcome-link" onClick={() => {
         forgetName();
         setNameState(null);

@@ -61,7 +61,7 @@ describe('player helpers', () => {
   it('ignores missing or broken stats', () => {
     localStorage.setItem('kaylesStats', 'not json')
     localStorage.setItem('chompStats', JSON.stringify({ humanWins: -4 }))
-    expect(totalWins()).toBe(0)
+    expect(totalWins(['kaylesStats', 'chompStats', 'missingStats'])).toBe(0)
   })
 })
 

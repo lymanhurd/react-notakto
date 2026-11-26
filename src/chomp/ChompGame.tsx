@@ -67,6 +67,7 @@ export default function ChompGame() {
     statsKey: 'chompStats',
     game: 'chomp',
     describeStart: board => sizeLabel({ rows: board.length, cols: board[0] }),
+    helpersOn: prefs.showLabel,
   });
   const board = game.state;
 
@@ -91,6 +92,7 @@ export default function ChompGame() {
   }
 
   function showHint() {
+    game.markHint();
     const wins = winningMoves(board);
     setHint(wins.length > 0 ? wins[0] : 'none');
   }
@@ -231,7 +233,7 @@ export default function ChompGame() {
       {game.phase === 'over' && (() => {
         const next = bigger(size);
         return (
-          <NextSteps game="chomp" winner={game.winner} strategyHref="#strategy"
+          <NextSteps game="chomp" winner={game.winner} helped={game.helpedWin} strategyHref="#strategy"
             harder={next ? { label: `Try a ${sizeLabel(next)} bar`, onClick: () => restart(next) } : undefined} />
         );
       })()}

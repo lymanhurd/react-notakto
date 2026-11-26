@@ -71,6 +71,7 @@ export default function KaylesGame() {
     statsKey: 'kaylesStats',
     game: 'kayles',
     describeStart: p => `${p.length} pins`,
+    helpersOn: prefs.showValues || prefs.showTally,
   });
   const pins = game.state;
 
@@ -90,6 +91,7 @@ export default function KaylesGame() {
   }
 
   function showHint() {
+    game.markHint();
     const wins = winningKnocks(pins);
     setHint(wins.length > 0 ? wins[0] : 'balanced');
   }
@@ -176,7 +178,7 @@ export default function KaylesGame() {
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
       {game.phase === 'over' && (
-        <NextSteps game="kayles" winner={game.winner} strategyHref="#strategy"
+        <NextSteps game="kayles" winner={game.winner} helped={game.helpedWin} strategyHref="#strategy"
           harder={prefs.size < MAX_PINS ? { label: `Try ${prefs.size + 1} pins`, onClick: () => resize(prefs.size + 1) } : undefined} />
       )}
       {hint === 'balanced' && (

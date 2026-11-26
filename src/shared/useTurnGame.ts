@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { load, save } from './storage';
 import { trackGameEnd, trackGameStart } from './analytics';
 import type { Player, Stats } from './GameParts';
+import { useHelpTracker } from './help';
 
 export type Phase = 'setup' | 'playing' | 'over';
 
@@ -17,6 +18,8 @@ interface Options<S, M> {
   game: string;
   /** Short description of a starting position for analytics, e.g. "8 dots". */
   describeStart: (state: S) => string;
+  /** True while a helper view (clusters, tally, values, marked squares, …) is switched on. */
+  helpersOn?: boolean;
   delayMs?: number;
 }
 
@@ -26,7 +29,7 @@ interface Options<S, M> {
  * then played; whoever makes the last move wins.
  */
 export function useTurnGame<S, M>({
-  initial, apply, isOver, computerMove, statsKey, game, describeStart, delayMs = 900,
+  initial, apply, isOver, computerMove, statsKey, game, describeStart, helpersOn = false, delayMs = 900,
 }: Options<S, M>) {
   const [state, setState] = useState<S>(initial);
   const [phase, setPhase] = useState<Phase>('setup');
@@ -35,6 +38,9 @@ export function useTurnGame<S, M>({
   const [pending, setPending] = useState<M | null>(null);
   const [lastComputerMove, setLastComputerMove] = useState<M | null>(null);
   const [stats, setStats] = useState<Stats>(() => load(statsKey, { humanWins: 0, computerWins: 0 }));
+  // Whether the game just finished was won with help (Hint or a helper view).
+  const [helpedWin, setHelpedWin] = useState(false);
+  const help = useHelpTracker(helpersOn, phase);
 
   // The latest state, for the computer's delayed move.
   const stateRef = useRef(state);
@@ -51,11 +57,13 @@ export function useTurnGame<S, M>({
     stateRef.current = next;
     setState(next);
     if (isOver(next)) {
+      const helped = help.helped(helpersOn);
       setPhase('over');
       setWinner(who);
+      setHelpedWin(who === 'human' && helped);
       trackGameEnd(game, who);
       setStats(s => (who === 'human'
-        ? { ...s, humanWins: s.humanWins + 1 }
+        ? { ...s, humanWins: s.humanWins + 1, cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1) }
         : { ...s, computerWins: s.computerWins + 1 }));
     } else {
       setPhase('playing');
@@ -90,6 +98,10 @@ export function useTurnGame<S, M>({
     lastComputerMove,
     stats,
     humanToMove,
+    /** The game just won used Hint or a helper view. */
+    helpedWin,
+    /** Call when the player presses Hint. */
+    markHint: help.markHint,
     playHuman(move: M) {
       if (humanToMove) play('human', move);
     },
@@ -108,6 +120,8 @@ export function useTurnGame<S, M>({
       setWinner(null);
       setPending(null);
       setLastComputerMove(null);
+      setHelpedWin(false);
+      help.reset(helpersOn);
     },
   };
 }

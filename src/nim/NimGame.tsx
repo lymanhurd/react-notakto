@@ -21,6 +21,7 @@ import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
 import { load, save } from '../shared/storage';
 import { getName, scoreLabel, youWon } from '../shared/player';
+import { useHelpTracker } from '../shared/help';
 
 type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
@@ -30,6 +31,8 @@ const COMPUTER_DELAY_MS = 900;
 interface Stats {
   humanWins: number;
   computerWins: number;
+  /** Wins with no Hint and the clusters and tally switched off. */
+  cleanWins?: number;
 }
 
 interface Prefs {
@@ -160,6 +163,9 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
   const [prefs, setPrefs] = useState<Prefs>(() => load(PREFS_KEY, { showClusters: true, showTally: true }));
 
   useEffect(() => save(STATS_KEY, stats), [STATS_KEY, stats]);
+  const helpersOn = prefs.showClusters || prefs.showTally;
+  const help = useHelpTracker(helpersOn, phase);
+  const [helpedWin, setHelpedWin] = useState(false);
   useEffect(() => save(PREFS_KEY, prefs), [PREFS_KEY, prefs]);
 
   /** Apply a move for `who`, then hand the turn over or end the game. */
@@ -173,11 +179,13 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     if (isGameOver(next)) {
       // Normal play: whoever takes the last stone wins. Misère: they lose.
       const won: Player = misere ? (who === 'human' ? 'computer' : 'human') : who;
+      const helped = help.helped(helpersOn);
       setPhase('over');
       setWinner(won);
+      setHelpedWin(won === 'human' && helped);
       trackGameEnd(game, won);
       setStats(s => (won === 'human'
-        ? { ...s, humanWins: s.humanWins + 1 }
+        ? { ...s, humanWins: s.humanWins + 1, cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1) }
         : { ...s, computerWins: s.computerWins + 1 }));
     } else {
       setPhase('playing');
@@ -228,6 +236,8 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     setHint(null);
     setPending(null);
     setLastComputerMove(null);
+    setHelpedWin(false);
+    help.reset(helpersOn);
   }
 
   function computerFirst() {
@@ -238,6 +248,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
   }
 
   function showHint() {
+    help.markHint();
     const moves = winningMoves(rows, misere);
     setHint(moves.length > 0 ? moves[0] : 'balanced');
     setSelection(null);
@@ -411,7 +422,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
       {phase === 'over' && (() => {
         const next = harderBoard(presets, startRows);
         return (
-          <NextSteps game={game} winner={winner} strategyHref="#strategy"
+          <NextSteps game={game} winner={winner} helped={helpedWin} strategyHref="#strategy"
             harder={{ label: next.label, onClick: () => chooseBoard(next.rows ?? randomRows()) }} />
         );
       })()}
