@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { oddSizes, tally } from './balance';
 import { NEXT_GAME, nextStepAttrs } from './links';
 import { positionUrl } from './position';
+import { getName, scoreLabel, youWon } from './player';
 
 export type Player = 'human' | 'computer';
 
@@ -11,10 +12,11 @@ export interface Stats {
 }
 
 export function Scoreboard({ stats }: { stats: Stats }) {
+  const [name] = useState(getName);
   return (
     <div className="scoreboard" aria-live="polite">
       <div className="score">
-        <span className="score-label">Human</span>
+        <span className="score-label" title={scoreLabel(name)}>{scoreLabel(name)}</span>
         <span className="score-value">{stats.humanWins}</span>
       </div>
       <div className="score">
@@ -26,9 +28,10 @@ export function Scoreboard({ stats }: { stats: Stats }) {
 }
 
 export function ResultBanner({ winner, win, loss }: { winner: Player | null; win: string; loss: string }) {
+  const [name] = useState(getName);
   return (
     <div className={`result-banner ${winner === 'human' ? 'win' : 'loss'}`} role="status">
-      <strong>{winner === 'human' ? 'You won!' : 'The computer won.'}</strong>
+      <strong>{winner === 'human' ? youWon(name) : 'The computer won.'}</strong>
       <span>{winner === 'human' ? win : loss}</span>
     </div>
   );

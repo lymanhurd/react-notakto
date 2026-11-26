@@ -20,6 +20,7 @@ import { BalanceTally, CopyLinkButton, NextSteps } from '../shared/GameParts';
 import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
 import { load, save } from '../shared/storage';
+import { getName, scoreLabel, youWon } from '../shared/player';
 
 type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
@@ -143,6 +144,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
   const STATS_KEY = misere ? 'misereNimStats' : 'nimStats';
   const PREFS_KEY = misere ? 'misereNimPrefs' : 'nimPrefs';
   const [startRows, setStartRows] = useState<Rows>(() => linkedRows(presets));
+  const [playerName] = useState(getName);
   const [rows, setRows] = useState<Rows>(startRows);
   const [phase, setPhase] = useState<Phase>('setup');
   const [turn, setTurn] = useState<Player>('human');
@@ -283,7 +285,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
         <h1>{misere ? 'Misère Nim' : 'Nim'}</h1>
         <div className="scoreboard" aria-live="polite">
           <div className="score">
-            <span className="score-label">Human</span>
+            <span className="score-label" title={scoreLabel(playerName)}>{scoreLabel(playerName)}</span>
             <span className="score-value">{stats.humanWins}</span>
           </div>
           <div className="score">
@@ -392,7 +394,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
 
       {phase === 'over' ? (
         <div className={`result-banner ${winner === 'human' ? 'win' : 'loss'}`} role="status">
-          <strong>{winner === 'human' ? 'You won!' : 'The computer won.'}</strong>
+          <strong>{winner === 'human' ? youWon(playerName) : 'The computer won.'}</strong>
           <span>
             {misere
               ? winner === 'human'

@@ -64,3 +64,38 @@ describe('player helpers', () => {
     expect(totalWins()).toBe(0)
   })
 })
+
+describe('the name on game pages', () => {
+  it('labels the scoreboard and the win banner with the name', async () => {
+    localStorage.setItem('playerName', 'Ada')
+    const { default: GrundyGame } = await import('../grundy/GrundyGame')
+    render(<GrundyGame />)
+    expect(screen.getByText('Ada')).toBeDefined()
+    expect(screen.queryByText('Human')).toBeNull()
+    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer dots' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
+    expect(screen.getByText('You won, Ada!')).toBeDefined()
+  })
+
+  it('names the player in Nim and NoTakTo too', async () => {
+    localStorage.setItem('playerName', 'Ada')
+    localStorage.setItem('notaktoSession', JSON.stringify({
+      gameState: { lastWinner: 'human' }, stats: { humanWins: 1, computerWins: 0 }, boards: ['XXX------'],
+    }))
+    HTMLCanvasElement.prototype.getContext = () => null
+    const { default: Game } = await import('../Game')
+    render(<Game />)
+    expect(screen.getByText('You won, Ada!')).toBeDefined()
+    expect(screen.getByText('Ada')).toBeDefined()
+    cleanup()
+    const { default: NimGame } = await import('../nim/NimGame')
+    render(<NimGame />)
+    expect(screen.getByText('Ada')).toBeDefined()
+  })
+
+  it('still says "Human" without a name', async () => {
+    const { default: GrundyGame } = await import('../grundy/GrundyGame')
+    render(<GrundyGame />)
+    expect(screen.getByText('Human')).toBeDefined()
+  })
+})

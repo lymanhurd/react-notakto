@@ -10,6 +10,7 @@ import type { BoardString, GameStats, GameState, Player } from './types/game';
 import { trackGameEnd, trackGameStart } from './shared/analytics';
 import { CopyLinkButton, NextSteps } from './shared/GameParts';
 import { intParam } from './shared/position';
+import { getName, scoreLabel, youWon } from './shared/player';
 
 // ---- Constants ----------------------------------------
 
@@ -217,10 +218,11 @@ interface ScoresProps {
 }
 
 function Scores({ humanWins, computerWins }: ScoresProps) {
+  const [name] = useState(getName);
   return (
     <div className="scoreboard" aria-live="polite">
       <div className="score">
-        <span className="score-label">Human</span>
+        <span className="score-label" title={scoreLabel(name)}>{scoreLabel(name)}</span>
         <span className="score-value">{humanWins}</span>
       </div>
       <div className="score">
@@ -236,10 +238,11 @@ interface ResultBannerProps {
 }
 
 function ResultBanner({ winner }: ResultBannerProps) {
+  const [name] = useState(getName);
   if (winner === 'human') {
     return (
       <div className="result-banner win" role="status">
-        <strong>You won!</strong>
+        <strong>{youWon(name)}</strong>
         <span>The computer killed the last board.</span>
       </div>
     );

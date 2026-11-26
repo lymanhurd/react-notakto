@@ -83,3 +83,9 @@ export function clearEverything(): void {
     // Nothing to clear if storage is unavailable.
   }
 }
+
+/** The player's side of the scoreboard: their name if they gave one. */
+export const scoreLabel = (name: string | null) => name ?? 'Human';
+
+/** Headline when the player wins: "You won, Ada!" or "You won!". */
+export const youWon = (name: string | null) => (name ? `You won, ${name}!` : 'You won!');
