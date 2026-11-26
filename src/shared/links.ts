@@ -25,14 +25,18 @@ export interface NextGame {
   pitch: string;
 }
 
-/** The game to suggest when each game ends, so players move along a path through the site. */
+/**
+ * The game to suggest when each game ends: the same order as the front page.
+ * Nim → Silver Dollar → Wythoff's Nim → Kayles → Grundy's Game → Chomp → NoTakTo → Nim.
+ * (Misère Nim will go between Chomp and NoTakTo once it exists.)
+ */
 export const NEXT_GAME: Record<string, NextGame> = {
-  nim: { title: 'Kayles', href: '/kayles/', pitch: 'Kayles is Nim in disguise: the same trick wins it.' },
-  kayles: { title: "Grundy's Game", href: '/grundy/', pitch: 'Another game the Nim strategy solves.' },
-  grundy: { title: 'Silver Dollar Game', href: '/silver/', pitch: 'Slide coins, and watch the gaps turn into Nim piles.' },
+  nim: { title: 'Silver Dollar Game', href: '/silver/', pitch: 'Slide coins, and watch the gaps turn into Nim piles.' },
   silver: { title: "Wythoff's Nim", href: '/wythoff/', pitch: 'Nim with a twist: you can take from both piles at once.' },
-  wythoff: { title: 'Chomp', href: '/chomp/', pitch: "Eat the chocolate bar, but don't take the poisoned square." },
-  chomp: { title: 'NoTakTo', href: '/notakto/', pitch: 'Tic-tac-toe where both players are X.' },
+  wythoff: { title: 'Kayles', href: '/kayles/', pitch: 'Knock down pins: each run of pins has its own Nim value.' },
+  kayles: { title: "Grundy's Game", href: '/grundy/', pitch: 'Simple rules, and nobody knows whether its values ever repeat.' },
+  grundy: { title: 'Chomp', href: '/chomp/', pitch: "Eat the chocolate bar, but don't take the poisoned square." },
+  chomp: { title: 'NoTakTo', href: '/notakto/', pitch: 'Tic-tac-toe where both players are X, and the last move loses.' },
   notakto: { title: 'Nim', href: '/nim/', pitch: 'The classic: learn the strategy behind many of these games.' },
 };
 
