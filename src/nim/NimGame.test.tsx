@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import NimGame from './NimGame'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 

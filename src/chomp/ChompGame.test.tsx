@@ -4,7 +4,7 @@ import ChompGame from './ChompGame'
 import * as analytics from '../shared/analytics'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 

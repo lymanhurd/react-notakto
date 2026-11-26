@@ -399,3 +399,55 @@ a:hover {
 .store-note + .site-footer {
   margin-top: 24px;
 }
+
+/* ---- After a game: next steps (shared by all games) ---------- */
+
+.next-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin: -6px 0 18px;
+}
+
+.next-steps a.btn-theme {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.next-game {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.next-game a {
+  font-weight: 600;
+}
+
+.next-game-pitch {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ---- Copy a link to the current setup ------------------------- */
+
+.copy-link {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-link-url {
+  min-width: 16em;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}

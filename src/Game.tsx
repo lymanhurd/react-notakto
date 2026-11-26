@@ -8,6 +8,8 @@ import { computerMove, isDead, isStart, humanMove, isGameOver, winningMoves } fr
 import { isWinning } from './monoid';
 import type { BoardString, GameStats, GameState, Player } from './types/game';
 import { trackGameEnd, trackGameStart } from './shared/analytics';
+import { CopyLinkButton, NextSteps } from './shared/GameParts';
+import { intParam } from './shared/position';
 
 // ---- Constants ----------------------------------------
 
@@ -18,6 +20,8 @@ const CANVAS_SIZE = 3 * SQUARE_WIDTH + 2 * LINE_WIDTH;
 const X_OFFSET = 10;
 const MARK_WIDTH = 5;
 const SESSION_KEY = 'notaktoSession';
+/** Most boards a link (?boards=N) or the "Try N boards" suggestion will set up. */
+const MAX_LINKED_BOARDS = 8;
 /** How long hint marks stay on the boards. */
 const HINT_MS = 4000;
 
@@ -260,12 +264,12 @@ function ResultBanner({ winner }: ResultBannerProps) {
 const INITIAL_BOARDS: BoardString[] = ['---------'];
 const INITIAL_STATS: GameStats = { computerWins: 0, humanWins: 0 };
 
-// ---- Session storage helpers --------------------------
+// ---- Saved-game helpers (localStorage) --------------------------
 
 const loadSession = (): PersistedSession => {
-  const raw = sessionStorage.getItem(SESSION_KEY);
-  if (!raw) return { gameState: {}, stats: INITIAL_STATS, boards: INITIAL_BOARDS };
   try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return { gameState: {}, stats: INITIAL_STATS, boards: INITIAL_BOARDS };
     const saved = JSON.parse(raw) as PersistedSession;
     return {
       gameState: saved.gameState ?? {},
@@ -283,14 +287,21 @@ const saveSession = (
   lastWinner: Player | null
 ): void => {
   const session: PersistedSession = { gameState: { lastWinner }, stats, boards };
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Storage can be unavailable (private mode); the game still works.
+  }
 };
 
 // ---- Game component ------------------------------------
 
 export default function Game() {
+  // A link like ?boards=3 starts a fresh game with that many boards.
+  const [linkedBoards] = useState(() => intParam('boards', 1, MAX_LINKED_BOARDS));
+
   const [boards, setBoards] = useState<BoardString[]>(() => {
-    return loadSession().boards;
+    return linkedBoards ? new Array(linkedBoards).fill('---------') : loadSession().boards;
   });
 
   const [stats, setStats] = useState<GameStats>(() => {
@@ -299,7 +310,7 @@ export default function Game() {
 
   // Who won the game currently on screen (null while a game is in progress).
   const [lastWinner, setLastWinner] = useState<Player | null>(() => {
-    return loadSession().gameState.lastWinner ?? null;
+    return linkedBoards ? null : loadSession().gameState.lastWinner ?? null;
   });
 
   useEffect(() => {
@@ -431,6 +442,7 @@ export default function Game() {
               </span>
               <PlusButton onClick={handlePlus} />
             </span>
+            <CopyLinkButton values={{ boards: boards.length }} className="btn btn-outline-primary btn-lg" />
           </>
         ) : (
           <StartButton startLabel={buttonLabel} variant={buttonVariant} onClick={handleQuit} />
@@ -446,6 +458,17 @@ export default function Game() {
         <ResultBanner winner={lastWinner} />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {gameOver && (
+        <NextSteps game="notakto" winner={lastWinner} strategyHref="/discussion.html"
+          harder={boards.length < MAX_LINKED_BOARDS ? {
+            label: `Try ${boards.length + 1} boards`,
+            onClick: () => {
+              setBoards(new Array(boards.length + 1).fill('---------'));
+              setLastWinner(null);
+              setHint(null);
+            },
+          } : undefined} />
       )}
       {hint && (
         <p className="hint-note" role="note">

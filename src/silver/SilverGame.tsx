@@ -14,13 +14,28 @@ import {
 } from './logic';
 import type { Coins, Move } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
-import { BalanceTally, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { intParam, listParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
 import { CoinFace } from './CoinFace';
 import type { CoinKind } from './CoinFace';
 
 const PREFS_KEY = 'silverPrefs';
+
+/**
+ * A link like ?coins=2,5,9&squares=12 sets the coins. Squares are counted from 1,
+ * starting next to the star.
+ */
+function linkedStart(): { coins: Coins; squares: number } | null {
+  const list = listParam('coins', 1, MAX_SQUARES, MAX_COINS);
+  if (!list) return null;
+  const coins = [...new Set(list)].sort((a, b) => a - b).map(n => n - 1);
+  if (coins.length !== list.length || isGameOver(coins)) return null;
+  const squares = Math.min(MAX_SQUARES,
+    Math.max(intParam('squares', 2, MAX_SQUARES) ?? 12, coins[coins.length - 1] + 1, coins.length + 1));
+  return { coins, squares };
+}
 
 interface Prefs {
   coins: number;
@@ -32,14 +47,19 @@ interface Prefs {
 const describe = (m: Move) => `slide the coin on square ${m.from + 1} to square ${m.to + 1}`;
 
 export default function SilverGame() {
-  const [prefs, setPrefsState] = useState<Prefs>(() =>
-    load(PREFS_KEY, { coins: 4, squares: 12, showGaps: false, showTally: true }));
+  const [link] = useState(linkedStart);
+  const [prefs, setPrefsState] = useState<Prefs>(() => {
+    const saved = load(PREFS_KEY, { coins: 4, squares: 12, showGaps: false, showTally: true });
+    return link ? { ...saved, coins: link.coins.length, squares: link.squares } : saved;
+  });
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
     save(PREFS_KEY, p);
   };
 
-  const [initial] = useState(() => randomCoins(prefs.coins, prefs.squares));
+  const [initial] = useState(() => link?.coins ?? randomCoins(prefs.coins, prefs.squares));
+  // A linked position is replayed by "Play again"; otherwise each game gets a new arrangement.
+  const [fixedStart, setFixedStart] = useState<Coins | null>(link?.coins ?? null);
   const game = useTurnGame<Coins, Move>({
     initial,
     apply: applyMove,
@@ -69,7 +89,18 @@ export default function SilverGame() {
     setPrefs(p);
     setSelected(null);
     setHint(null);
+    setFixedStart(null);
     game.reset(randomCoins(p.coins, p.squares));
+  }
+
+  function playAgain() {
+    if (!fixedStart) {
+      newArrangement();
+      return;
+    }
+    setSelected(null);
+    setHint(null);
+    game.reset(fixedStart);
   }
 
   function clickCoin(pos: number) {
@@ -184,6 +215,7 @@ export default function SilverGame() {
             <button type="button" className="btn-theme primary" onClick={() => { setSelected(null); game.computerFirst(); }}>
               Computer moves first
             </button>
+            <CopyLinkButton values={{ coins: coins.map(c => c + 1).join(','), squares: prefs.squares }} />
           </>
         )}
         {game.phase !== 'over' && (
@@ -193,8 +225,8 @@ export default function SilverGame() {
         )}
         {game.phase !== 'setup' && (
           <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
-            onClick={() => newArrangement()}>
-            {game.phase === 'over' ? 'Play again' : 'New game'}
+            onClick={playAgain}>
+            {game.phase === 'over' ? 'Play again' : fixedStart ? 'Restart' : 'New game'}
           </button>
         )}
         <span className="toggles">
@@ -218,6 +250,12 @@ export default function SilverGame() {
           loss="It made the last move. Try the Nim view to see why!" />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {game.phase === 'over' && (
+        <NextSteps game="silver" winner={game.winner} strategyHref="#strategy"
+          harder={prefs.coins < MAX_COINS
+            ? { label: `Try ${prefs.coins + 1} coins`, onClick: () => newArrangement({ coins: prefs.coins + 1 }) }
+            : undefined} />
       )}
       {hint === 'balanced' && (
         <p className="hint-note">
@@ -312,7 +350,7 @@ export default function SilverGame() {
         </ul>
       </section>
 
-      <section className="rules-card strategy-card">
+      <section id="strategy" className="rules-card strategy-card">
         <h2>Strategy: Nim in disguise</h2>
         <ol className="rules">
           <li>Starting from the far end, label the coins alternately <strong>silver</strong> (trailing) and <strong>copper</strong> (leading). In the Nim view the silver coins become dimes and the copper coins pennies.</li>

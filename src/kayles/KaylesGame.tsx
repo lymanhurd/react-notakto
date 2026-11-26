@@ -13,11 +13,15 @@ import {
 } from './logic';
 import type { Knock, Pins } from './logic';
 import { CLUSTER_SIZES } from '../shared/balance';
-import { BalanceTally, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
 
 const PREFS_KEY = 'kaylesPrefs';
+
+/** A link like ?pins=12 sets the starting row. */
+const linked = (p: Prefs): Prefs => ({ ...p, size: intParam('pins', MIN_PINS, MAX_PINS) ?? p.size });
 
 interface Prefs {
   size: number;
@@ -53,7 +57,7 @@ function segments(pins: Pins): Segment[] {
 
 export default function KaylesGame() {
   const [prefs, setPrefsState] = useState<Prefs>(() =>
-    load(PREFS_KEY, { size: 10, showValues: true, showTally: true }));
+    linked(load(PREFS_KEY, { size: 10, showValues: true, showTally: true })));
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
     save(PREFS_KEY, p);
@@ -137,6 +141,7 @@ export default function KaylesGame() {
             <button type="button" className="btn-theme primary" onClick={game.computerFirst}>
               Computer moves first
             </button>
+            <CopyLinkButton values={{ pins: prefs.size }} />
           </>
         )}
         {game.phase !== 'over' && (
@@ -169,6 +174,10 @@ export default function KaylesGame() {
           loss="It knocked down the last pin. Try handing it a Balanced board!" />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {game.phase === 'over' && (
+        <NextSteps game="kayles" winner={game.winner} strategyHref="#strategy"
+          harder={prefs.size < MAX_PINS ? { label: `Try ${prefs.size + 1} pins`, onClick: () => resize(prefs.size + 1) } : undefined} />
       )}
       {hint === 'balanced' && (
         <p className="hint-note">
@@ -262,7 +271,7 @@ export default function KaylesGame() {
         </ul>
       </section>
 
-      <section className="rules-card strategy-card">
+      <section id="strategy" className="rules-card strategy-card">
         <h2>Strategy</h2>
         <p>
           Each run of standing pins behaves exactly like a Nim row whose size is its <strong>value</strong> from

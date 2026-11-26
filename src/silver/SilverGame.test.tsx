@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import SilverGame from './SilverGame'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 
@@ -21,7 +21,7 @@ const status = () => screen.getByRole('status').textContent ?? ''
 
 /** Start with 2 coins on 6 squares; with Math.random fixed at 0.5 they land on squares 1 and 6. */
 function renderTwoCoins(showGaps = false) {
-  sessionStorage.setItem('silverPrefs', JSON.stringify({ coins: 2, squares: 6, showGaps, showTally: true }))
+  localStorage.setItem('silverPrefs', JSON.stringify({ coins: 2, squares: 6, showGaps, showTally: true }))
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
   render(<SilverGame />)
 }

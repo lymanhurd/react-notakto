@@ -14,11 +14,19 @@ import {
   winningMoves,
 } from './logic';
 import type { Pos } from './logic';
-import { ResultBanner, Scoreboard } from '../shared/GameParts';
+import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
 
 const PREFS_KEY = 'wythoffPrefs';
+
+/** A link like ?a=7&b=11 sets the starting piles. */
+function linked(p: Prefs): Prefs {
+  const a = intParam('a', 0, MAX_PILE);
+  const b = intParam('b', 0, MAX_PILE);
+  return a !== null && b !== null && a + b > 0 ? { ...p, start: { a, b } } : p;
+}
 
 type View = 'grid' | 'piles' | 'both';
 
@@ -33,7 +41,7 @@ const fmt = (p: Pos) => `(${p.a}, ${p.b})`;
 
 export default function WythoffGame() {
   const [prefs, setPrefsState] = useState<Prefs>(() =>
-    load(PREFS_KEY, { start: { a: 7, b: 11 }, view: 'both', marked: false }));
+    linked(load(PREFS_KEY, { start: { a: 7, b: 11 }, view: 'both', marked: false })));
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
     save(PREFS_KEY, p);
@@ -265,6 +273,7 @@ export default function WythoffGame() {
               </span>
             ))}
             <button type="button" className="btn-theme" onClick={() => restart(randomStart())}>Random start</button>
+            <CopyLinkButton values={{ a: prefs.start.a, b: prefs.start.b }} />
             <button type="button" className="btn-theme primary" disabled={isGameOver(pos)} onClick={() => {
               setComputerFrom(pos);
               game.computerFirst();
@@ -312,6 +321,10 @@ export default function WythoffGame() {
           loss="It took the last stone. Play again and look for its pattern!" />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {game.phase === 'over' && (
+        <NextSteps game="wythoff" winner={game.winner}
+          harder={{ label: 'Try a random start', onClick: () => restart(randomStart()) }} />
       )}
       {hint === 'none' && (
         <p className="hint-note">

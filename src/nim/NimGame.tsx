@@ -14,8 +14,10 @@ import {
   winningMoves,
 } from './logic';
 import type { Move, Rows } from './logic';
-import { BalanceTally } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps } from '../shared/GameParts';
+import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
+import { load, save } from '../shared/storage';
 
 type Player = 'human' | 'computer';
 type Phase = 'setup' | 'playing' | 'over';
@@ -34,24 +36,19 @@ interface Prefs {
   showTally: boolean;
 }
 
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = sessionStorage.getItem(key);
-    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function save(key: string, value: unknown): void {
-  try {
-    sessionStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage can be unavailable (private mode); the game still works.
-  }
-}
-
 const fmt = (rows: Rows) => `(${rows.join(', ')})`;
+
+/** A link like ?rows=4,6,7 sets the starting board; otherwise the first preset. */
+const linkedRows = (): Rows => listParam('rows', 1, MAX_ROW, MAX_ROWS) ?? PRESETS[0].rows;
+
+/** After a win: the next preset in the packet's order, or a random board after the last one. */
+function harderBoard(start: Rows): { label: string; rows: Rows | null } {
+  const i = PRESETS.findIndex(p => fmt(p.rows) === fmt(start));
+  const next = i >= 0 ? PRESETS[i + 1] : undefined;
+  return next
+    ? { label: `Next: ${next.label} ${fmt(next.rows)}`, rows: next.rows }
+    : { label: 'Try a random board', rows: null };
+}
 const stonesWord = (n: number) => (n === 1 ? 'stone' : 'stones');
 
 /** Is stone `idx` of `row` part of `move` (moves take stones from the right-hand end)? */
@@ -137,8 +134,8 @@ function NimBoard({
 // ---- Game -------------------------------------------------------
 
 export default function NimGame() {
-  const [startRows, setStartRows] = useState<Rows>(PRESETS[0].rows);
-  const [rows, setRows] = useState<Rows>(PRESETS[0].rows);
+  const [startRows, setStartRows] = useState<Rows>(linkedRows);
+  const [rows, setRows] = useState<Rows>(startRows);
   const [phase, setPhase] = useState<Phase>('setup');
   const [turn, setTurn] = useState<Player>('human');
   const [winner, setWinner] = useState<Player | null>(null);
@@ -331,9 +328,12 @@ export default function NimGame() {
 
       <div className="play-controls">
         {phase === 'setup' && (
-          <button type="button" className="btn-theme primary" onClick={computerFirst}>
-            Computer moves first
-          </button>
+          <>
+            <button type="button" className="btn-theme primary" onClick={computerFirst}>
+              Computer moves first
+            </button>
+            <CopyLinkButton values={{ rows: startRows.join(',') }} />
+          </>
         )}
         {selection && humanToMove && (
           <>
@@ -391,6 +391,13 @@ export default function NimGame() {
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
+      {phase === 'over' && (() => {
+        const next = harderBoard(startRows);
+        return (
+          <NextSteps game="nim" winner={winner} strategyHref="#strategy"
+            harder={{ label: next.label, onClick: () => chooseBoard(next.rows ?? randomRows()) }} />
+        );
+      })()}
 
       {hint === 'balanced' && (
         <p className="hint-note">
@@ -420,7 +427,7 @@ export default function NimGame() {
         {prefs.showTally && <BalanceTally values={rows} sizes={sizes} />}
       </div>
 
-      <section className="rules-card">
+      <section id="strategy" className="rules-card">
         <h2>How to play</h2>
         <ul className="rules">
           <li>On your turn, choose <strong>one row</strong> and take as many stones as you like from it (at least one).</li>

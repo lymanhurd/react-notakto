@@ -20,11 +20,26 @@ import {
   winningMoves,
 } from './logic';
 import type { Bite, Board, Size } from './logic';
-import { ResultBanner, Scoreboard } from '../shared/GameParts';
+import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
 
 const PREFS_KEY = 'chompPrefs';
+
+/** A link like ?rows=4&cols=7 sets the size of the bar. */
+function linked(p: Prefs): Prefs {
+  const rows = intParam('rows', MIN_ROWS, MAX_ROWS);
+  const cols = intParam('cols', MIN_COLS, MAX_COLS);
+  return rows !== null && cols !== null ? { ...p, size: { rows, cols } } : p;
+}
+
+/** A slightly bigger bar to try after a win, or null at the largest size. */
+function bigger({ rows, cols }: Size): Size | null {
+  if (cols < MAX_COLS) return { rows, cols: cols + 1 };
+  if (rows < MAX_ROWS) return { rows: rows + 1, cols };
+  return null;
+}
 
 interface Prefs {
   size: Size;
@@ -37,7 +52,7 @@ const where = (b: Bite) => `row ${b.row + 1}, column ${b.col + 1}`;
 
 export default function ChompGame() {
   const [prefs, setPrefsState] = useState<Prefs>(() =>
-    load(PREFS_KEY, { size: { rows: 4, cols: 7 }, showLabel: false }));
+    linked(load(PREFS_KEY, { size: { rows: 4, cols: 7 }, showLabel: false })));
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
     save(PREFS_KEY, p);
@@ -177,12 +192,15 @@ export default function ChompGame() {
 
       <div className="play-controls">
         {game.phase === 'setup' && (
-          <button type="button" className="btn-theme primary" onClick={() => {
-            setComputerFrom(board);
-            game.computerFirst();
-          }}>
-            Computer moves first
-          </button>
+          <>
+            <button type="button" className="btn-theme primary" onClick={() => {
+              setComputerFrom(board);
+              game.computerFirst();
+            }}>
+              Computer moves first
+            </button>
+            <CopyLinkButton values={{ rows: size.rows, cols: size.cols }} />
+          </>
         )}
         {game.phase !== 'over' && (
           <button type="button" className="btn-theme" onClick={showHint} disabled={!game.humanToMove}>
@@ -210,6 +228,13 @@ export default function ChompGame() {
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
       )}
+      {game.phase === 'over' && (() => {
+        const next = bigger(size);
+        return (
+          <NextSteps game="chomp" winner={game.winner} strategyHref="#strategy"
+            harder={next ? { label: `Try a ${sizeLabel(next)} bar`, onClick: () => restart(next) } : undefined} />
+        );
+      })()}
       {hint === 'none' && (
         <p className="hint-note">
           There is no winning bite from here. Nibble a single corner square and wait for the computer to slip.
@@ -248,7 +273,7 @@ export default function ChompGame() {
         </ul>
       </section>
 
-      <section className="rules-card strategy-card">
+      <section id="strategy" className="rules-card strategy-card">
         <h2>Things we know</h2>
         <ul className="rules">
           <li>On a full rectangle the <strong>first player can always win</strong>. If the second player had a winning plan, the first player could steal it by eating just the top right square, since any reply would leave a board the first player could have made in one bite. This proves a winning move exists without saying what it is!</li>

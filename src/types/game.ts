@@ -81,7 +81,7 @@ export interface Move {
 // ─── Session storage ──────────────────────────────────────────────────────────
 
 /**
- * Shape of the data persisted to sessionStorage between page reloads.
+ * Shape of the data persisted to localStorage between page reloads.
  * Mirrors GameState plus the running stats totals.
  */
 export interface PersistedSession {

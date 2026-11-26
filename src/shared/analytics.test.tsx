@@ -8,7 +8,7 @@ import { track } from './analytics'
 const trackSpy = vi.fn()
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   trackSpy.mockReset()
   window.umami = { track: trackSpy }
 })

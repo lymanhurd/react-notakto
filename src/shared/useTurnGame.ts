@@ -11,7 +11,7 @@ interface Options<S, M> {
   /** True when the player to move has no legal move (normal play: they lose). */
   isOver: (state: S) => boolean;
   computerMove: (state: S) => M | null;
-  /** sessionStorage key for the running score. */
+  /** localStorage key for the running score. */
   statsKey: string;
   /** Game name for analytics, e.g. "grundy". */
   game: string;

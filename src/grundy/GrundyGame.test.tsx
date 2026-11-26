@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import GrundyGame from './GrundyGame'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 

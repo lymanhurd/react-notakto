@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import WythoffGame from './WythoffGame'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 
@@ -55,7 +55,7 @@ describe('WythoffGame', () => {
       vi.advanceTimersByTime(1000)
     })
     cleanup()
-    sessionStorage.clear()
+    localStorage.clear()
     render(<WythoffGame />)
     expect(screen.getAllByRole('button', { name: /from both piles/ })).toHaveLength(7)
     fireEvent.click(screen.getByRole('button', { name: 'Take 2 from both piles' }))

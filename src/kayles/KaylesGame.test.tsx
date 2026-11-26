@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import KaylesGame from './KaylesGame'
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   vi.useFakeTimers()
 })
 

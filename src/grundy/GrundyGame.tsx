@@ -12,12 +12,16 @@ import {
 } from './logic';
 import type { Groups, Split } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
-import { BalanceTally, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
 import OpenProblem, { LAST_SHOWN } from './OpenProblem';
 
 const PREFS_KEY = 'grundyPrefs';
+
+/** A link like ?dots=12 sets the starting row. */
+const linked = (p: Prefs): Prefs => ({ ...p, size: intParam('dots', MIN_DOTS, MAX_DOTS) ?? p.size });
 
 interface Prefs {
   size: number;
@@ -33,7 +37,7 @@ const describe = (groups: Groups, s: Split) =>
 
 export default function GrundyGame() {
   const [prefs, setPrefsState] = useState<Prefs>(() =>
-    load(PREFS_KEY, { size: 8, showValues: true, showTally: true }));
+    linked(load(PREFS_KEY, { size: 8, showValues: true, showTally: true })));
   const setPrefs = (p: Prefs) => {
     setPrefsState(p);
     save(PREFS_KEY, p);
@@ -114,6 +118,7 @@ export default function GrundyGame() {
             <button type="button" className="btn-theme primary" onClick={game.computerFirst}>
               Computer moves first
             </button>
+            <CopyLinkButton values={{ dots: prefs.size }} />
           </>
         )}
         {game.phase !== 'over' && (
@@ -146,6 +151,10 @@ export default function GrundyGame() {
           loss="It made the last split. Try handing it a Balanced board!" />
       ) : (
         <p className="turn-prompt" role="status">{prompt}</p>
+      )}
+      {game.phase === 'over' && (
+        <NextSteps game="grundy" winner={game.winner} strategyHref="#strategy"
+          harder={prefs.size < MAX_DOTS ? { label: `Try ${prefs.size + 1} dots`, onClick: () => resize(prefs.size + 1) } : undefined} />
       )}
       {hint === 'balanced' && (
         <p className="hint-note">
@@ -222,7 +231,7 @@ export default function GrundyGame() {
         </ul>
       </section>
 
-      <section className="rules-card strategy-card">
+      <section id="strategy" className="rules-card strategy-card">
         <h2>Strategy</h2>
         <p>
           Each group behaves exactly like a Nim row whose size is its <strong>value</strong> from the table

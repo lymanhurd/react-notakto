@@ -4,7 +4,7 @@ import Game from './Game'
 
 // Mock canvas getContext so jsdom doesn't throw
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
 
   HTMLCanvasElement.prototype.getContext = () => null
 })
@@ -13,9 +13,9 @@ afterEach(() => {
   cleanup()
 })
 
-/** Seed sessionStorage as if a game had just finished. */
+/** Seed localStorage as if a game had just finished. */
 function seedFinishedGame(lastWinner: 'human' | 'computer') {
-  sessionStorage.setItem(
+  localStorage.setItem(
     'notaktoSession',
     JSON.stringify({
       gameState: { lastWinner },
@@ -97,7 +97,7 @@ describe('Game', () => {
   })
 
   it('Hint says when there is no winning move', () => {
-    sessionStorage.setItem('notaktoSession', JSON.stringify({
+    localStorage.setItem('notaktoSession', JSON.stringify({
       gameState: { lastWinner: null }, stats: { humanWins: 0, computerWins: 0 }, boards: ['----x----'],
     }))
     render(<Game />)
