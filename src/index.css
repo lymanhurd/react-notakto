@@ -116,17 +116,40 @@ div.dead {
   box-shadow: none;
 }
 
-div.dead canvas {
-  cursor: not-allowed;
+/* The canvas draws the board; transparent buttons on top are the squares. */
+.board-frame {
+  position: relative;
 }
 
-div.boards:not(.dead) canvas {
+.board-cells {
+  position: absolute;
+  inset: 0;
+}
+
+.board-cells .square {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   cursor: pointer;
 }
 
-/* Even number of boards: squares can't be clicked until the computer moves. */
-.game-board.locked div.boards canvas {
+.board-cells .square:hover:not([aria-disabled="true"]) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.board-cells .square[aria-disabled="true"] {
   cursor: default;
+}
+
+.board-cells .square:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+div.dead .board-cells {
+  cursor: not-allowed;
 }
 
 .game-board.locked div.boards:hover {

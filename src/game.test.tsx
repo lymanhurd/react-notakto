@@ -111,3 +111,52 @@ describe('Game', () => {
     expect(screen.queryByRole('button', { name: 'Hint' })).toBeNull()
   })
 })
+
+describe('Game: keyboard and screen readers', () => {
+  it('gives each square a button with a spoken label', () => {
+    render(<Game />)
+    expect(screen.getByRole('grid', { name: 'Board' })).toBeDefined()
+    expect(screen.getAllByRole('button', { name: /: empty$/ })).toHaveLength(9)
+    expect(screen.getByRole('button', { name: 'Center: empty' })).toBeDefined()
+  })
+
+  it('plays a square, then announces the computer\'s reply', () => {
+    render(<Game />)
+    fireEvent.click(screen.getByRole('button', { name: 'Center: empty' }))
+    expect(screen.getByRole('button', { name: 'Center: X' })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('status').textContent).toMatch(/^The computer played (top|middle|bottom|center).*Your move\.$/)
+    expect(screen.getAllByRole('button', { name: /X, last move/ })).toHaveLength(1)
+  })
+
+  it('keeps one tab stop per board and moves with the arrow keys', () => {
+    render(<Game />)
+    const grid = screen.getByRole('grid')
+    const tabbable = () => [...grid.querySelectorAll('button')].filter(b => b.tabIndex === 0)
+    expect(tabbable()).toHaveLength(1)
+    const first = tabbable()[0]
+    first.focus()
+    fireEvent.keyDown(first, { key: 'ArrowRight' })
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Top middle: empty' }))
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' })
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Center: empty' }))
+    expect(tabbable()).toHaveLength(1)
+  })
+
+  it('locks the squares until the computer starts on an even number of boards', () => {
+    render(<Game />)
+    fireEvent.click(screen.getByRole('button', { name: '+' }))
+    const square = screen.getAllByRole('button', { name: 'Center: empty' })[0]
+    expect(square).toHaveAttribute('aria-disabled', 'true')
+    fireEvent.click(square)
+    expect(screen.getByRole('status').textContent).toMatch(/computer moves first/i)
+  })
+
+  it('describes a finished board', () => {
+    localStorage.setItem('notaktoSession', JSON.stringify({
+      gameState: { lastWinner: null }, stats: { humanWins: 0, computerWins: 0 }, boards: ['XXX------', '---------'],
+    }))
+    render(<Game />)
+    expect(screen.getByRole('img', { name: /Board 1 of 2: finished.*X in top left, top middle and top right/ })).toBeDefined()
+    expect(screen.getByRole('grid', { name: 'Board 2 of 2' })).toBeDefined()
+  })
+})

@@ -9,6 +9,7 @@ import { isWinning } from './monoid';
 import type { BoardString, GameStats, GameState, Player } from './types/game';
 import { trackGameEnd, trackGameStart } from './shared/analytics';
 import { CopyLinkButton, NextSteps } from './shared/GameParts';
+import { usePlayAgainFocus } from './shared/usePlayAgainFocus';
 import { intParam } from './shared/position';
 import { getName, scoreLabel, youWon } from './shared/player';
 
@@ -153,9 +154,37 @@ function PlusButton({ onClick }: PlusMinusButtonProps) {
 interface BoardProps {
   contents: BoardString;
   className: string;
+  /** Position of this board (0-based) and how many boards there are, for spoken labels. */
+  index: number;
+  total: number;
+  /** A finished board (three in a row): shown, but nothing can be played on it. */
+  dead?: boolean;
+  /** Squares can't be played yet (the computer moves first). */
+  locked?: boolean;
   /** Squares to mark with a small hint X. */
   hints?: number[];
-  onClick?: (event: React.MouseEvent<HTMLCanvasElement>) => void;
+  onPlay?: (square: number) => void;
+}
+
+const SQUARE_NAMES = [
+  'top left', 'top middle', 'top right',
+  'middle left', 'center', 'middle right',
+  'bottom left', 'bottom middle', 'bottom right',
+];
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** "board 2, top left" (or just "top left" when there is one board). */
+function squareName(board: number, square: number, total: number): string {
+  return total > 1 ? `board ${board + 1}, ${SQUARE_NAMES[square]}` : SQUARE_NAMES[square];
+}
+
+/** Where the X's are, e.g. "X in top left, center and bottom right". */
+function describeMarks(contents: BoardString): string {
+  const marked = SQUARE_NAMES.filter((_, i) => contents[i] !== '-');
+  if (marked.length === 0) return 'empty';
+  const list = marked.length === 1 ? marked[0] : `${marked.slice(0, -1).join(', ')} and ${marked[marked.length - 1]}`;
+  return `X in ${list}`;
 }
 
 /** Re-render when the OS switches between light and dark mode (canvas colors are baked in). */
@@ -173,8 +202,15 @@ function useColorScheme(): boolean {
   return dark;
 }
 
-function Board({ contents, className, onClick, hints = [] }: BoardProps) {
+/**
+ * One 3 x 3 board. The canvas draws it; a grid of transparent buttons on top makes
+ * each square something you can click, tab to, and hear with a screen reader.
+ * The board is one tab stop: arrow keys move between its squares.
+ */
+function Board({ contents, className, index, total, dead = false, locked = false, onPlay, hints = [] }: BoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const squareRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [active, setActive] = useState(() => Math.max(0, contents.indexOf('-')));
   const dark = useColorScheme();
   const hintKey = hints.join(',');
 
@@ -199,17 +235,77 @@ function Board({ contents, className, onClick, hints = [] }: BoardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contents, dark, hintKey]);
 
+  function onKeyDown(e: React.KeyboardEvent) {
+    const row = Math.floor(active / 3);
+    const col = active % 3;
+    let next: number;
+    switch (e.key) {
+      case 'ArrowRight': next = row * 3 + Math.min(2, col + 1); break;
+      case 'ArrowLeft': next = row * 3 + Math.max(0, col - 1); break;
+      case 'ArrowDown': next = Math.min(2, row + 1) * 3 + col; break;
+      case 'ArrowUp': next = Math.max(0, row - 1) * 3 + col; break;
+      case 'Home': next = e.ctrlKey ? 0 : row * 3; break;
+      case 'End': next = e.ctrlKey ? 8 : row * 3 + 2; break;
+      default: return;
+    }
+    e.preventDefault();
+    setActive(next);
+    squareRefs.current[next]?.focus();
+  }
+
+  const boardName = total > 1 ? `Board ${index + 1} of ${total}` : 'Board';
+
   return (
     <div className={className}>
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_SIZE}
-        height={CANVAS_SIZE}
-        style={{ width: CANVAS_SIZE, height: CANVAS_SIZE, display: 'block' }}
-        onClick={onClick}
-      >
-        Your browser does not support HTML5.
-      </canvas>
+      <div className="board-frame" style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}>
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_SIZE}
+          height={CANVAS_SIZE}
+          style={{ width: CANVAS_SIZE, height: CANVAS_SIZE, display: 'block' }}
+          aria-hidden="true"
+        />
+        {dead ? (
+          <div className="board-cells" role="img"
+            aria-label={`${boardName}: finished, three in a row. ${capitalize(describeMarks(contents))}.`} />
+        ) : (
+          <div className="board-cells" role="grid" aria-label={boardName} onKeyDown={onKeyDown}>
+            {[0, 1, 2].map(row => (
+              <div key={row} role="row">
+                {[0, 1, 2].map(col => {
+                  const sq = row * 3 + col;
+                  const cell = contents[sq];
+                  const unavailable = locked || cell !== '-';
+                  const hinted = hints.includes(sq);
+                  const state = cell === 'x' ? 'X, last move' : cell === 'X' ? 'X' : hinted ? 'empty, winning move' : 'empty';
+                  return (
+                    <div key={col} role="gridcell">
+                      <button
+                        ref={el => { squareRefs.current[sq] = el; }}
+                        type="button"
+                        className="square"
+                        style={{
+                          left: col * SQUARE_WITH_BDY,
+                          top: row * SQUARE_WITH_BDY,
+                          width: SQUARE_WIDTH,
+                          height: SQUARE_WIDTH,
+                        }}
+                        tabIndex={sq === active ? 0 : -1}
+                        aria-disabled={unavailable}
+                        aria-label={`${capitalize(SQUARE_NAMES[sq])}: ${state}`}
+                        onFocus={() => setActive(sq)}
+                        onClick={() => {
+                          if (!unavailable) onPlay?.(sq);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -301,6 +397,16 @@ const saveSession = (
   }
 };
 
+/** The square the computer just played: the one that went from empty to the newest mark. */
+function findNewMark(before: BoardString[], after: BoardString[]): { board: number; square: number } | null {
+  for (let b = 0; b < after.length; b++) {
+    for (let sq = 0; sq < 9; sq++) {
+      if (before[b]?.[sq] === '-' && after[b][sq] !== '-') return { board: b, square: sq };
+    }
+  }
+  return null;
+}
+
 // ---- Game component ------------------------------------
 
 export default function Game() {
@@ -335,6 +441,18 @@ export default function Game() {
     return () => window.clearTimeout(timer);
   }, [hint]);
 
+  // The computer's latest move, announced in the turn prompt.
+  const [computerLast, setComputerLast] = useState<{ board: number; square: number } | null>(null);
+
+  // After a move that finishes the board in focus, keep keyboard focus on the boards.
+  const focusAfterMove = useRef(false);
+  useEffect(() => {
+    if (!focusAfterMove.current) return;
+    focusAfterMove.current = false;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    document.querySelector<HTMLButtonElement>('.game-board [role="grid"] button[tabindex="0"]')?.focus();
+  }, [boards]);
+
   function showHint() {
     setHintUsed(true);
     setHint({ moves: winningMoves(boards) });
@@ -365,7 +483,10 @@ export default function Game() {
     setHint(null);
     trackGameStart('notakto', 'computer', boardsLabel(boards.length));
     const result = computerMove(boards);
-    if (result !== undefined) setBoards(result);
+    if (result !== undefined) {
+      setComputerLast(findNewMark(boards, result));
+      setBoards(result);
+    }
   }
 
   function handleQuit() {
@@ -376,6 +497,7 @@ export default function Game() {
     const newBoards: BoardString[] = new Array(boards.length).fill('---------');
     setBoards(newBoards);
     setLastWinner(null);
+    setComputerLast(null);
     setStats(prev => ({
       ...prev,
       computerWins: isGameOver(boards)
@@ -384,14 +506,11 @@ export default function Game() {
     }));
   }
 
-  function handleBoardClick(event: React.MouseEvent<HTMLCanvasElement>, idx: number) {
+  function handleSquare(idx: number, squareNum: number) {
     // With an even number of boards the computer must move first.
     if (waitingForStart) return;
 
-    const squareNum =
-      Math.floor(event.nativeEvent.offsetX / SQUARE_WITH_BDY) +
-      3 * Math.floor(event.nativeEvent.offsetY / SQUARE_WITH_BDY);
-
+    focusAfterMove.current = true;
     let newBoards = humanMove(boards, idx, squareNum);
     if (newBoards === null) return;
     setHint(null);
@@ -407,6 +526,7 @@ export default function Game() {
 
     const afterComputer = computerMove(newBoards);
     if (afterComputer !== undefined) {
+      setComputerLast(findNewMark(newBoards, afterComputer));
       newBoards = afterComputer;
     }
 
@@ -434,11 +554,15 @@ export default function Game() {
   let prompt: string;
   if (atStart) {
     prompt = humanMovesFirst
-      ? `With ${boards.length} ${boardWord}, you move first. Click any square to begin.`
+      ? `With ${boards.length} ${boardWord}, you move first. Choose any square to begin.`
       : `With ${boards.length} ${boardWord}, the computer moves first. Press Start.`;
+  } else if (computerLast) {
+    prompt = `The computer played ${squareName(computerLast.board, computerLast.square, boards.length)}. Your move.`;
   } else {
-    prompt = 'Your move. Click a square on any live board.';
+    prompt = 'Your move. Choose a square on any live board.';
   }
+
+  const playAgainRef = usePlayAgainFocus(gameOver ? 'over' : 'playing');
 
   return (
     <div className="game">
@@ -463,7 +587,9 @@ export default function Game() {
             <CopyLinkButton values={{ boards: boards.length }} className="btn btn-outline-primary btn-lg" />
           </>
         ) : (
-          <StartButton startLabel={buttonLabel} variant={buttonVariant} onClick={handleQuit} />
+          <Button ref={playAgainRef} variant={buttonVariant} size="lg" onClick={handleQuit}>
+            {buttonLabel}
+          </Button>
         )}
         {!gameOver && !waitingForStart && (
           <Button variant="outline-primary" size="lg" onClick={showHint}>
@@ -484,6 +610,7 @@ export default function Game() {
             onClick: () => {
               setBoards(new Array(boards.length + 1).fill('---------'));
               setLastWinner(null);
+              setComputerLast(null);
               setHint(null);
               setHintUsed(false);
             },
@@ -502,14 +629,17 @@ export default function Game() {
       <div className={waitingForStart ? 'game-board locked' : 'game-board'}>
         {boards.map((elt, idx) =>
           isDead(boards[idx]) ? (
-            <Board key={idx} contents={elt} className="boards dead" />
+            <Board key={idx} contents={elt} className="boards dead" index={idx} total={boards.length} dead />
           ) : (
             <Board
               key={idx}
               contents={elt}
               className="boards"
+              index={idx}
+              total={boards.length}
+              locked={waitingForStart}
               hints={hint?.moves.filter(m => m.board === idx).map(m => m.square)}
-              onClick={(event) => handleBoardClick(event, idx)}
+              onPlay={square => handleSquare(idx, square)}
             />
           )
         )}
@@ -523,6 +653,7 @@ export default function Game() {
           <li>Whoever kills the last board loses.</li>
           <li>With an odd number of boards you move first; with an even number, press "Start" and the computer moves first. Either way, a perfect player can always win from your side.</li>
           <li>The <span className="last-move">highlighted X</span> is the most recent move.</li>
+          <li>Keyboard: Tab to a board, use the arrow keys to move between squares, and press Enter or Space to play.</li>
           <li>Stuck? Press <strong>Hint</strong> to see, for a few seconds, every square that is a winning move.</li>
         </ul>
         <p className="more"><a href="/discussion.html">More discussion →</a></p>
