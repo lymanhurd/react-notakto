@@ -53,6 +53,45 @@ function multiply(m1: MonoidElement, m2: MonoidElement): MonoidElement {
   return MULTIPLICATION_TABLE[key];
 }
 
+// ─── Analysis helpers (for the "Show monoid values" view) ──────────────────────
+
+/** Display names of the 18 elements, by index (index 0 is the identity, written 1). */
+export const ELEMENT_NAMES: readonly string[] = [
+  '1', 'a', 'b', 'ab', 'b²', 'ab²', 'c', 'ac', 'bc', 'abc', 'c²', 'ac²', 'bc²', 'abc²', 'd', 'ad', 'bd', 'abd',
+];
+
+/**
+ * The relations that define the monoid, from Plambeck and Whitehead:
+ * Q = ⟨a, b, c, d | a² = 1, b³ = b, b²c = c, c³ = ac², b²d = d, cd = ad, d² = c²⟩.
+ */
+export const RELATIONS: readonly [string, string][] = [
+  ['a²', '1'],
+  ['b³', 'b'],
+  ['b²c', 'c'],
+  ['c³', 'ac²'],
+  ['b²d', 'd'],
+  ['cd', 'ad'],
+  ['d²', 'c²'],
+];
+
+/** The monoid value of one board. A finished board (three in a row) is the identity. */
+export function boardValue(board: BoardString): MonoidElement {
+  return BOARD_VALUES[board.toUpperCase()] ?? 0;
+}
+
+/** The product of all the board values. */
+export function monoidProduct(boards: BoardString[]): MonoidElement {
+  return boards.map(boardValue).reduce((acc, curr) => multiply(acc, curr), 0);
+}
+
+/**
+ * A P-position: the Previous player (who just moved) wins with perfect play,
+ * so the player to move loses. Every other element is an N-position.
+ */
+export function isPPosition(element: MonoidElement): boolean {
+  return winningIndices.includes(element);
+}
+
 // ─── Board values ─────────────────────────────────────────────────────────────
 
 /**

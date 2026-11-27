@@ -5,13 +5,14 @@ import './shared/theme.css';
 import './index.css';
 
 import { computerMove, isDead, isStart, humanMove, isGameOver, winningMoves } from './logic';
-import { isWinning } from './monoid';
+import { isWinning, boardValue, monoidProduct, isPPosition, ELEMENT_NAMES, RELATIONS } from './monoid';
 import type { BoardString, GameStats, GameState, Player } from './types/game';
 import { trackGameEnd, trackGameStart } from './shared/analytics';
 import { CopyLinkButton, NextSteps } from './shared/GameParts';
 import { usePlayAgainFocus } from './shared/usePlayAgainFocus';
 import { intParam } from './shared/position';
 import { getName, scoreLabel, youWon } from './shared/player';
+import { load, save } from './shared/storage';
 
 // ---- Constants ----------------------------------------
 
@@ -22,6 +23,7 @@ const CANVAS_SIZE = 3 * SQUARE_WIDTH + 2 * LINE_WIDTH;
 const X_OFFSET = 10;
 const MARK_WIDTH = 5;
 const SESSION_KEY = 'notaktoSession';
+const PREFS_KEY = 'notaktoPrefs';
 /** Most boards a link (?boards=N) or the "Try N boards" suggestion will set up. */
 const MAX_LINKED_BOARDS = 8;
 /** How long hint marks stay on the boards. */
@@ -163,6 +165,8 @@ interface BoardProps {
   locked?: boolean;
   /** Squares to mark with a small hint X. */
   hints?: number[];
+  /** Name of this board's monoid value, shown under the board when set. */
+  value?: string;
   onPlay?: (square: number) => void;
 }
 
@@ -207,7 +211,7 @@ function useColorScheme(): boolean {
  * each square something you can click, tab to, and hear with a screen reader.
  * The board is one tab stop: arrow keys move between its squares.
  */
-function Board({ contents, className, index, total, dead = false, locked = false, onPlay, hints = [] }: BoardProps) {
+function Board({ contents, className, index, total, dead = false, locked = false, onPlay, hints = [], value }: BoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const squareRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [active, setActive] = useState(() => Math.max(0, contents.indexOf('-')));
@@ -254,6 +258,7 @@ function Board({ contents, className, index, total, dead = false, locked = false
   }
 
   const boardName = total > 1 ? `Board ${index + 1} of ${total}` : 'Board';
+  const valueId = `board-value-${index}`;
 
   return (
     <div className={className}>
@@ -267,9 +272,11 @@ function Board({ contents, className, index, total, dead = false, locked = false
         />
         {dead ? (
           <div className="board-cells" role="img"
-            aria-label={`${boardName}: finished, three in a row. ${capitalize(describeMarks(contents))}.`} />
+            aria-label={`${boardName}: finished, three in a row. ${capitalize(describeMarks(contents))}.`}
+            aria-describedby={value ? valueId : undefined} />
         ) : (
-          <div className="board-cells" role="grid" aria-label={boardName} onKeyDown={onKeyDown}>
+          <div className="board-cells" role="grid" aria-label={boardName} onKeyDown={onKeyDown}
+            aria-describedby={value ? valueId : undefined}>
             {[0, 1, 2].map(row => (
               <div key={row} role="row">
                 {[0, 1, 2].map(col => {
@@ -306,7 +313,76 @@ function Board({ contents, className, index, total, dead = false, locked = false
           </div>
         )}
       </div>
+      {value && (
+        <p className="board-value" id={valueId}>
+          Value <span className="monoid-elt">{value}</span>
+          {dead && <span className="board-value-note"> (finished)</span>}
+        </p>
+      )}
     </div>
+  );
+}
+
+/** A monoid element, color-coded and labelled P or N so color is never the only cue. */
+function ElementChip({ element }: { element: number }) {
+  const p = isPPosition(element);
+  return <span className={`monoid-elt ${p ? 'is-p' : 'is-n'}`}>{ELEMENT_NAMES[element]}</span>;
+}
+
+const P_ELEMENTS = ELEMENT_NAMES.map((_, i) => i).filter(isPPosition);
+const N_ELEMENTS = ELEMENT_NAMES.map((_, i) => i).filter(i => !isPPosition(i));
+
+/** Product of the board values, whether it is a P- or N-position, and the monoid's definition. */
+function MonoidPanel({ boards }: { boards: BoardString[] }) {
+  const product = monoidProduct(boards);
+  const p = isPPosition(product);
+  const factors = boards.map(b => ELEMENT_NAMES[boardValue(b)]);
+  return (
+    <section className="monoid-panel" aria-labelledby="monoid-heading">
+      <h2 id="monoid-heading">Monoid values</h2>
+      <p className="monoid-product">
+        Product{boards.length > 1 && <> <span className="monoid-factors">{factors.join(' · ')}</span> =</>}{' '}
+        <span className={`monoid-result ${p ? 'is-p' : 'is-n'}`}>
+          {ELEMENT_NAMES[product]}
+          <span className="monoid-tag">{p ? 'P-position' : 'N-position'}</span>
+        </span>
+      </p>
+      <p className="monoid-meaning">
+        {p
+          ? 'The player to move loses if the other player plays perfectly.'
+          : 'The player to move can win with perfect play.'}
+      </p>
+      <div className="monoid-callout" role="note" aria-label="P- and N-positions">
+        <p>
+          <strong>P-positions</strong> (the Previous player wins, so the player to move loses):{' '}
+          {P_ELEMENTS.map((e, i) => <span key={e}>{i > 0 && ', '}<ElementChip element={e} /></span>)}.
+        </p>
+        <p>
+          <strong>N-positions</strong> (the Next player, who moves now, wins): the other {N_ELEMENTS.length},{' '}
+          {N_ELEMENTS.map((e, i) => <span key={e}>{i > 0 && ', '}<ElementChip element={e} /></span>)}.
+        </p>
+      </div>
+      <details className="monoid-relations">
+        <summary>Relations that define the monoid</summary>
+        <p>
+          Every board has a value in an 18-element commutative monoid with generators{' '}
+          <i>a</i>, <i>b</i>, <i>c</i>, <i>d</i> and these relations:
+        </p>
+        <ul>
+          {RELATIONS.map(([lhs, rhs]) => (
+            <li key={lhs}><span className="monoid-elt">{lhs}</span> = <span className="monoid-elt">{rhs}</span></li>
+          ))}
+        </ul>
+        <p>
+          The 18 elements are 1, <i>a</i>, <i>b</i>, <i>ab</i>, <i>b</i>², <i>ab</i>², and each of{' '}
+          <i>c</i>, <i>c</i>², <i>d</i> times 1, <i>a</i>, <i>b</i> or <i>ab</i>. A finished board has value 1. Several boards together have the product of their values.
+        </p>
+        <p>
+          Source: Thane Plambeck and Greg Whitehead,{' '}
+          <a href="https://arxiv.org/abs/1301.1672">The Secrets of Notakto: Winning at X-only Tic-Tac-Toe</a> (2013).
+        </p>
+      </details>
+    </section>
   );
 }
 
@@ -429,6 +505,10 @@ export default function Game() {
   // Hint pressed during this game: a win then doesn't count as "without help".
   const [hintUsed, setHintUsed] = useState(() => (linkedBoards ? false : loadSession().hintUsed === true));
 
+  // "Show monoid values" checkbox, remembered between visits.
+  const [showMonoid, setShowMonoid] = useState(() => load(PREFS_KEY, { showMonoid: false }).showMonoid);
+  useEffect(() => save(PREFS_KEY, { showMonoid }), [showMonoid]);
+
   useEffect(() => {
     saveSession(boards, stats, lastWinner, hintUsed);
   }, [boards, stats, lastWinner, hintUsed]);
@@ -514,6 +594,9 @@ export default function Game() {
     let newBoards = humanMove(boards, idx, squareNum);
     if (newBoards === null) return;
     setHint(null);
+    // Playing with the monoid values showing counts as help, like a hint.
+    const helped = hintUsed || showMonoid;
+    if (showMonoid) setHintUsed(true);
     if (isStart(boards)) trackGameStart('notakto', 'human', boardsLabel(boards.length));
 
     if (isGameOver(newBoards)) {
@@ -537,7 +620,7 @@ export default function Game() {
       setStats(prev => ({
         ...prev,
         humanWins: prev.humanWins + 1,
-        cleanWins: (prev.cleanWins ?? 0) + (hintUsed ? 0 : 1),
+        cleanWins: (prev.cleanWins ?? 0) + (helped ? 0 : 1),
       }));
       return;
     }
@@ -596,6 +679,14 @@ export default function Game() {
             Hint
           </Button>
         )}
+        <label className="monoid-toggle">
+          <input type="checkbox" checked={showMonoid}
+            onChange={e => {
+              setShowMonoid(e.target.checked);
+              if (e.target.checked && !atStart && !gameOver) setHintUsed(true);
+            }} />
+          Show monoid values
+        </label>
       </div>
 
       {gameOver ? (
@@ -629,7 +720,8 @@ export default function Game() {
       <div className={waitingForStart ? 'game-board locked' : 'game-board'}>
         {boards.map((elt, idx) =>
           isDead(boards[idx]) ? (
-            <Board key={idx} contents={elt} className="boards dead" index={idx} total={boards.length} dead />
+            <Board key={idx} contents={elt} className="boards dead" index={idx} total={boards.length} dead
+              value={showMonoid ? ELEMENT_NAMES[0] : undefined} />
           ) : (
             <Board
               key={idx}
@@ -639,11 +731,14 @@ export default function Game() {
               total={boards.length}
               locked={waitingForStart}
               hints={hint?.moves.filter(m => m.board === idx).map(m => m.square)}
+              value={showMonoid ? ELEMENT_NAMES[boardValue(elt)] : undefined}
               onPlay={square => handleSquare(idx, square)}
             />
           )
         )}
       </div>
+
+      {showMonoid && <MonoidPanel boards={boards} />}
 
       <section id="explanation" className="rules-card">
         <h2>How to play</h2>
@@ -655,6 +750,7 @@ export default function Game() {
           <li>The <span className="last-move">highlighted X</span> is the most recent move.</li>
           <li>Keyboard: Tab to a board, use the arrow keys to move between squares, and press Enter or Space to play.</li>
           <li>Stuck? Press <strong>Hint</strong> to see, for a few seconds, every square that is a winning move.</li>
+          <li>Curious how the computer plays? Check <strong>Show monoid values</strong> to see each board's value in the Notakto monoid and whether their product is a P- or N-position. Wins with it on count as helped.</li>
         </ul>
         <p className="more"><a href="/discussion.html">More discussion →</a></p>
       </section>
