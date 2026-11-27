@@ -78,3 +78,13 @@ describe('NimGame', () => {
     expect(screen.getByText('You won!')).toBeDefined()
   })
 })
+
+describe('NimGame setup controls', () => {
+  it('hides "Computer moves first" once a stone is picked, and brings it back on Cancel', () => {
+    render(<NimGame />)
+    fireEvent.click(screen.getByRole('button', { name: 'Row 3: take 1 stone' }))
+    expect(screen.queryByRole('button', { name: 'Computer moves first' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('button', { name: 'Computer moves first' })).toBeDefined()
+  })
+})

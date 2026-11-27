@@ -232,9 +232,11 @@ export default function SilverGame() {
                 disabled={prefs.squares >= MAX_SQUARES} onClick={() => newArrangement({ squares: prefs.squares + 1 })}>+</button>
             </span>
             <button type="button" className="btn-theme" onClick={() => newArrangement()}>Shuffle</button>
-            <button type="button" className="btn-theme primary" onClick={() => { setSelected(null); game.computerFirst(); }}>
-              Computer moves first
-            </button>
+            {selected === null && (
+              <button type="button" className="btn-theme primary" onClick={() => game.computerFirst()}>
+                Computer moves first
+              </button>
+            )}
             <CopyLinkButton values={{ coins: coins.map(c => c + 1).join(','), squares: prefs.squares }} />
           </>
         )}

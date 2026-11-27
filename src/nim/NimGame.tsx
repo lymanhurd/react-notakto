@@ -379,7 +379,8 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
       </section>
 
       <div className="play-controls">
-        {phase === 'setup' && (
+        {/* Once a stone is picked, the first move has begun: only Take and Cancel apply. */}
+        {phase === 'setup' && !selection && (
           <>
             <button type="button" className="btn-theme primary" onClick={computerFirst}>
               Computer moves first
