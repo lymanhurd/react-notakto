@@ -341,7 +341,7 @@
   transition: background 0.12s ease;
 }
 
-.wy-link:hover:not(:disabled)::before,
+.wy-link:hover:not(:disabled):not([aria-disabled="true"])::before,
 .wy-link.preview::before,
 .wy-link:focus-visible::before {
   background: var(--accent);
@@ -356,7 +356,8 @@
   animation: hint-pulse 1.2s ease-in-out infinite;
 }
 
-.wy-link:disabled {
+.wy-link:disabled,
+.wy-link[aria-disabled="true"] {
   cursor: default;
 }
 
@@ -403,4 +404,7 @@
   .wy-link.hint {
     animation: none;
   }
+}
+.wy-cell > button[aria-disabled="true"] {
+  cursor: default;
 }

@@ -82,8 +82,8 @@ describe('SilverGame', () => {
     // Coins on 1 and 6: piles [4], so the winning move is 6 → 2 (empty the pile).
     fireEvent.click(screen.getByRole('button', { name: 'Hint' }))
     expect(screen.getByText(/slide the coin on square 6 to square 2/)).toBeDefined()
-    fireEvent.click(screen.getByRole('button', { name: 'Coin on square 6' }))
-    expect(document.querySelector('.cell.hint-target .target-btn')?.getAttribute('aria-label')).toBe('Slide to square 2')
+    fireEvent.click(screen.getByRole('button', { name: 'Coin on square 6, hint: move this coin' }))
+    expect(document.querySelector('.cell.hint-target .target-btn')?.getAttribute('aria-label')).toBe('Slide to square 2, hint')
   })
 
   it('stepper and Shuffle change the setup', () => {

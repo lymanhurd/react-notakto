@@ -17,20 +17,20 @@ afterEach(() => {
 const status = () => screen.getByRole('status').textContent ?? ''
 const squares = () => document.querySelectorAll('.ch-cell.square').length
 const bite = (row: number, col: number) =>
-  fireEvent.click(screen.getByRole('button', { name: `Bite at row ${row}, column ${col}` }))
+  fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Bite at row ${row}, column ${col}:`) }))
 
 describe('ChompGame', () => {
   it('starts on the 4 × 7 bar with the poisoned square nailed down', () => {
     render(<ChompGame />)
     expect(squares()).toBe(27)
     expect(screen.getByRole('img', { name: /Poisoned square/ })).toBeDefined()
-    expect(screen.queryByRole('button', { name: 'Bite at row 1, column 1' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Bite at row 1, column 1:/ })).toBeNull()
   })
 
   it('previews a bite on hover and eats the block on click; the computer replies', () => {
     const start = vi.spyOn(analytics, 'trackGameStart')
     render(<ChompGame />)
-    const target = screen.getByRole('button', { name: 'Bite at row 3, column 4' })
+    const target = screen.getByRole('button', { name: /^Bite at row 3, column 4:/ })
     fireEvent.mouseEnter(target)
     expect(status()).toMatch(/eat 8 squares, leaving \(3, 3, 7, 7\)/)
     expect(document.querySelectorAll('.ch-cell.preview')).toHaveLength(8)

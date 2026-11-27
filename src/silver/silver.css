@@ -137,11 +137,12 @@
   user-select: none;
 }
 
-.coin:hover:not(:disabled):not(.stuck) {
+.coin:hover:not(:disabled):not([aria-disabled="true"]):not(.stuck) {
   transform: translateY(-2px);
 }
 
 .coin:disabled,
+.coin[aria-disabled="true"],
 .coin.stuck {
   cursor: default;
 }

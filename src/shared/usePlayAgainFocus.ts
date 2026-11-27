@@ -12,7 +12,7 @@ export function usePlayAgainFocus(phase: string) {
     if (phase === 'over' && previous.current !== 'over') {
       const active = document.activeElement as HTMLElement | null;
       const lost = !active || active === document.body || (active as HTMLButtonElement).disabled;
-      if (lost || active?.closest('.play-board, .game-board')) ref.current?.focus();
+      if (lost || active?.closest('.play-board, .game-board, [data-board]')) ref.current?.focus();
     }
     previous.current = phase;
   }, [phase]);

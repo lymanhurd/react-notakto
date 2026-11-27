@@ -3,7 +3,7 @@ import SiteFooter from './shared/SiteFooter';
 
 const App = () => (
   <div className="page">
-    <a className="back-link" href="/">← Lyman's Logic Games</a>
+    <nav aria-label="Home"><a className="back-link" href="/">← Lyman's Logic Games</a></nav>
 
     <main id="main">
       <Game />

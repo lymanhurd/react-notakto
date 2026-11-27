@@ -13,7 +13,9 @@ import {
 } from './logic';
 import type { Knock, Pins } from './logic';
 import { CLUSTER_SIZES } from '../shared/balance';
-import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable, BoardDescription } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
@@ -126,6 +128,17 @@ export default function KaylesGame() {
 
   const playAgainRef = usePlayAgainFocus(game.phase);
 
+  const standing = segments(pins).filter(seg => seg.kind !== 'down') as { start: number; length: number }[];
+  const runText = standing.map(({ start, length }) => length === 1
+    ? `pin ${start + 1}`
+    : `pins ${start + 1} to ${start + length}`).join('; ');
+  const boardText = standing.length === 0
+    ? 'All pins are down.'
+    : `${standing.length === 1 ? 'One run' : `${standing.length} runs`} of standing pins: ${runText}.${
+      prefs.showValues ? ` Run values: ${standing.map(r => kaylesValue(r.length)).join(', ')}.` : ''}`;
+  const { describe: describeBoard, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describeBoard);
+
   return (
     <div className="kayles">
       <header className="game-header">
@@ -196,8 +209,10 @@ export default function KaylesGame() {
         </p>
       )}
 
+      <BoardDescription id="kayles-board-text" text={boardText} spoken={spoken} onDescribe={describeBoard} />
       <div className={`play-layout${prefs.showTally ? '' : ' no-tally'}`}>
-        <div className="play-board kayles-board">
+        <div ref={boardRef} className="play-board kayles-board" role="group" aria-label="Pins"
+          aria-describedby="kayles-board-text">
           {segments(pins).map(seg => {
             if (seg.kind === 'down') {
               return (
@@ -223,25 +238,29 @@ export default function KaylesGame() {
                         <button
                           type="button"
                           className={pinClasses(i)}
-                          disabled={!game.humanToMove}
-                          aria-label={`Knock down pin ${i + 1}`}
+                          data-row={0}
+                          data-col={2 * i}
+                          aria-disabled={!game.humanToMove}
+                          aria-label={`Knock down pin ${i + 1}${same(hintKnock, single) ? ', hint' : ''}`}
                           onMouseEnter={() => setHover(single)}
                           onMouseLeave={() => setHover(null)}
                           onFocus={() => setHover(single)}
                           onBlur={() => setHover(null)}
-                          onClick={() => play(single)}
+                          onClick={() => game.humanToMove && play(single)}
                         />
                         {k < length - 1 && (
                           <button
                             type="button"
                             className={linkClasses.join(' ')}
-                            disabled={!game.humanToMove}
-                            aria-label={`Knock down pins ${i + 1} and ${i + 2}`}
+                            data-row={0}
+                            data-col={2 * i + 1}
+                            aria-disabled={!game.humanToMove}
+                            aria-label={`Knock down pins ${i + 1} and ${i + 2}${same(hintKnock, pair) ? ', hint' : ''}`}
                             onMouseEnter={() => setHover(pair)}
                             onMouseLeave={() => setHover(null)}
                             onFocus={() => setHover(pair)}
                             onBlur={() => setHover(null)}
-                            onClick={() => play(pair)}
+                            onClick={() => game.humanToMove && play(pair)}
                           />
                         )}
                       </span>

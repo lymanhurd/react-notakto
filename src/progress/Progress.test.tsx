@@ -20,7 +20,7 @@ afterEach(() => {
 function winGrundy() {
   render(<GrundyGame />)
   for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer dots' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
+  fireEvent.click(screen.getByRole('button', { name: /^Split 3 into 1 and 2/ }))
 }
 
 describe('wins without help', () => {
@@ -42,7 +42,7 @@ describe('wins without help', () => {
     fireEvent.click(screen.getByLabelText('Show values'))
     fireEvent.click(screen.getByLabelText('Show tally'))
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer dots' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Split 3 into 1 and 2/ }))
     expect(readRecord('grundyStats').cleanWins).toBe(1)
   })
 
@@ -50,7 +50,7 @@ describe('wins without help', () => {
     localStorage.setItem('grundyPrefs', JSON.stringify({ size: 3, showValues: false, showTally: false }))
     render(<GrundyGame />)
     fireEvent.click(screen.getByRole('button', { name: 'Hint' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Split 3 into 1 and 2/ }))
     expect(readRecord('grundyStats')).toEqual({ wins: 1, cleanWins: 0, losses: 0 })
   })
 

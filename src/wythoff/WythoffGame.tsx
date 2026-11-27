@@ -14,7 +14,9 @@ import {
   winningMoves,
 } from './logic';
 import type { Pos } from './logic';
-import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
@@ -120,6 +122,18 @@ export default function WythoffGame() {
     return classes.join(' ');
   }
 
+  const stonesWord = (n: number) => `${n} ${n === 1 ? 'stone' : 'stones'}`;
+  const boardText = `Pile A: ${stonesWord(pos.a)}. Pile B: ${stonesWord(pos.b)}. On the grid, the marker is at ${fmt(pos)}.`;
+  const { describe, spoken } = useBoardDescription(boardText);
+  const gridRef = useBoardNav(describe);
+  const pilesRef = useBoardNav(describe);
+
+  /** Extra words for a square or stone: the hinted move, a marked square. */
+  const notes = (to: Pos) => [
+    samePos(hintPos, to) ? 'hint' : '',
+    marked && isP(to) ? 'special square' : '',
+  ].filter(Boolean).map(n => `, ${n}`).join('');
+
   const rows = Array.from({ length: GRID }, (_, i) => GRID - 1 - i);
   const cols = Array.from({ length: GRID }, (_, i) => i);
 
@@ -131,24 +145,28 @@ export default function WythoffGame() {
           {rows.map(b => <span key={b}>{b}</span>)}
         </div>
         <div className="wy-grid-area">
-          <div className="wy-grid" role="grid" aria-label="Grid of positions">
+          <div ref={gridRef} className="wy-grid" role="grid" aria-label="Grid of positions"
+            aria-describedby="wythoff-board-text" data-board>
             {rows.map(b => (
               <div key={b} className="wy-row" role="row">
                 {cols.map(a => {
                   const p = { a, b };
-                  const legal = game.humanToMove && isLegal(pos, p);
+                  const legal = game.phase !== 'over' && isLegal(pos, p);
                   const here = samePos(pos, p);
                   return (
                     <span key={a} role="gridcell" className={cellClasses(p)}>
                       {legal ? (
                         <button
                           type="button"
-                          aria-label={`Move to ${fmt(p)}`}
+                          data-row={GRID - 1 - b}
+                          data-col={a}
+                          aria-disabled={!game.humanToMove}
+                          aria-label={`Move to ${fmt(p)}: ${describeMove(pos, p)}${notes(p)}`}
                           onMouseEnter={() => setHover(p)}
                           onMouseLeave={() => setHover(null)}
                           onFocus={() => setHover(p)}
                           onBlur={() => setHover(null)}
-                          onClick={() => play(p)}
+                          onClick={() => game.humanToMove && play(p)}
                         />
                       ) : (
                         <span aria-label={here ? `Marker at ${fmt(p)}` : undefined}>
@@ -182,7 +200,7 @@ export default function WythoffGame() {
   const shownClass = game.pending ? 'pending' : preview ? 'preview' : 'hint';
   const takenFrom = (name: 'a' | 'b') => (shown ? pos[name] - shown[name] : 0);
 
-  function stoneRow(name: 'a' | 'b') {
+  function stoneRow(name: 'a' | 'b', navRow: number) {
     const n = pos[name];
     const label = name.toUpperCase();
     return (
@@ -202,13 +220,15 @@ export default function WythoffGame() {
                 key={i}
                 type="button"
                 className={classes.join(' ')}
-                disabled={!game.humanToMove}
-                aria-label={`Take ${take} from pile ${label}`}
+                data-row={navRow}
+                data-col={i}
+                aria-disabled={!game.humanToMove}
+                aria-label={`Take ${take} from pile ${label}${notes(to)}`}
                 onMouseEnter={() => setHover(to)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(to)}
                 onBlur={() => setHover(null)}
-                onClick={() => play(to)}
+                onClick={() => game.humanToMove && play(to)}
               />
             );
           })}
@@ -222,8 +242,9 @@ export default function WythoffGame() {
   const bothTaken = shown && pos.a - shown.a === pos.b - shown.b ? pos.a - shown.a : 0;
 
   const piles = (
-    <div className="play-board wy-piles">
-      {stoneRow('a')}
+    <div ref={pilesRef} className="play-board wy-piles" role="group" aria-label="Piles"
+      aria-describedby="wythoff-board-text">
+      {stoneRow('a', 0)}
       <div className="wy-pile-row wy-links-row">
         <span className="wy-pile-label wy-links-label">Both</span>
         <span className="wy-stones">
@@ -237,19 +258,21 @@ export default function WythoffGame() {
                 key={i}
                 type="button"
                 className={classes.join(' ')}
-                disabled={!game.humanToMove}
-                aria-label={`Take ${take} from both piles`}
+                data-row={1}
+                data-col={i}
+                aria-disabled={!game.humanToMove}
+                aria-label={`Take ${take} from both piles${notes(to)}`}
                 onMouseEnter={() => setHover(to)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(to)}
                 onBlur={() => setHover(null)}
-                onClick={() => play(to)}
+                onClick={() => game.humanToMove && play(to)}
               />
             );
           })}
         </span>
       </div>
-      {stoneRow('b')}
+      {stoneRow('b', 2)}
       <p className="wy-equiv">
         Click a stone to take it and every stone to its left. Click between the rows to take that many from
         both piles. On the grid this is square {fmt(pos)}: column {pos.a}, row {pos.b}.
@@ -353,6 +376,7 @@ export default function WythoffGame() {
         </aside>
       )}
 
+      <BoardDescription id="wythoff-board-text" text={boardText} spoken={spoken} onDescribe={describe} />
       <div className={`wy-layout view-${prefs.view}`}>
         {showGrid && grid}
         {showPiles && piles}

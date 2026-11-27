@@ -34,7 +34,8 @@
   cursor: pointer;
 }
 
-.pin:disabled {
+.pin:disabled,
+.pin[aria-disabled="true"] {
   cursor: default;
 }
 
@@ -80,11 +81,12 @@
   transition: background 0.12s ease, transform 0.12s ease;
 }
 
-.link:disabled {
+.link:disabled,
+.link[aria-disabled="true"] {
   cursor: default;
 }
 
-.link:hover:not(:disabled)::before,
+.link:hover:not(:disabled):not([aria-disabled="true"])::before,
 .link.preview::before {
   background: var(--last);
   border-color: var(--last);

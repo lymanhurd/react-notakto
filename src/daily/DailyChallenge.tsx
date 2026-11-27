@@ -18,6 +18,9 @@ import type { DailyMove, DailyRecord } from './logic';
 import { load, save } from '../shared/storage';
 import { track } from '../shared/analytics';
 import { getName } from '../shared/player';
+import { BoardDescription } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 
 
 const longDate = (date: string) => {
@@ -98,6 +101,13 @@ export default function DailyChallenge() {
     }
   }
 
+  const rowName = (row: number) => (wythoff ? `Pile ${row === 0 ? 'A' : 'B'}` : `Row ${row + 1}`);
+  const boardText = shownRows
+    .map((n, row) => `${rowName(row)}: ${n === 0 ? 'empty' : `${n} ${n === 1 ? 'stone' : 'stones'}`}.`)
+    .join(' ');
+  const { describe: describeBoard, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describeBoard);
+
   return (
     <main className="daily">
       <header className="daily-header">
@@ -157,9 +167,11 @@ export default function DailyChallenge() {
         </p>
       )}
 
-      <div className={`daily-board play-board${done ? ' done' : ''}`}>
+      <BoardDescription id="daily-board-text" text={boardText} spoken={spoken} onDescribe={describeBoard} />
+      <div ref={boardRef} className={`daily-board play-board${done ? ' done' : ''}`}
+        role="group" aria-label="Puzzle" aria-describedby="daily-board-text">
         {shownRows.map((n, row) => (
-          <div className="daily-row" key={row}>
+          <div className="daily-row" key={row} role="group" aria-label={rowName(row)}>
             <span className="daily-row-label">
               {wythoff ? `Pile ${row === 0 ? 'A' : 'B'}` : `Row ${row + 1}`}
               <span className="daily-row-count">{n}</span>
@@ -178,7 +190,10 @@ export default function DailyChallenge() {
                     type="button"
                     className={classes.join(' ')}
                     disabled={!legal}
-                    aria-label={both ? `Take ${take} from both piles` : `${wythoff ? `Pile ${row === 0 ? 'A' : 'B'}` : `Row ${row + 1}`}: take ${take}`}
+                    data-row={legal ? row : undefined}
+                    data-col={legal ? i : undefined}
+                    aria-label={`${both ? `Take ${take} from both piles` : `${rowName(row)}: take ${take}`}${
+                      takes(answer, puzzle.rows, row, i) && take === answer?.take ? ' (a winning move)' : ''}`}
                     onMouseEnter={() => setHover(move)}
                     onMouseLeave={() => setHover(null)}
                     onFocus={() => setHover(move)}

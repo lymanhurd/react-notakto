@@ -12,7 +12,9 @@ import {
 } from './logic';
 import type { Groups, Split } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
-import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable, BoardDescription } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
@@ -103,6 +105,12 @@ export default function GrundyGame() {
 
   const playAgainRef = usePlayAgainFocus(game.phase);
 
+  const dotsList = groups.length === 1 ? `${groups[0]}` : `${groups.slice(0, -1).join(', ')} and ${groups[groups.length - 1]}`;
+  const boardText = `${groups.length === 1 ? 'One group' : `${groups.length} groups`} of dots: ${dotsList}.${
+    prefs.showValues ? ` Values: ${groups.map(grundyValue).join(', ')}.` : ''}`;
+  const { describe: describeBoard, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describeBoard);
+
   return (
     <div className="grundy">
       <header className="game-header">
@@ -173,13 +181,16 @@ export default function GrundyGame() {
         </p>
       )}
 
+      <BoardDescription id="grundy-board-text" text={boardText} spoken={spoken} onDescribe={describeBoard} />
       <div className={`play-layout${prefs.showTally ? '' : ' no-tally'}`}>
-        <div className={`play-board grundy-board${game.humanToMove ? '' : ' waiting'}`}>
+        <div ref={boardRef} className={`play-board grundy-board${game.humanToMove ? '' : ' waiting'}`}
+          role="group" aria-label="Dots" aria-describedby="grundy-board-text">
           {groups.map((n, g) => {
             const first = starts[g];
             const dead = n < MIN_DOTS;
             return (
-              <div key={`${g}-${first}`} className={`grundy-group${dead ? ' dead' : ''}`}>
+              <div key={`${g}-${first}`} className={`grundy-group${dead ? ' dead' : ''}`}
+                role="group" aria-label={`Group ${g + 1}: ${n} ${n === 1 ? 'dot' : 'dots'}`}>
                 <div className="grundy-dots">
                   {Array.from({ length: n }, (_, k) => (
                     <span key={k} className="grundy-slot">
@@ -195,13 +206,18 @@ export default function GrundyGame() {
                           <button
                             type="button"
                             className={classes.join(' ')}
-                            disabled={!legal || !game.humanToMove}
-                            aria-label={legal ? `Split ${n} into ${k} and ${n - k}` : `Can't split ${n} into equal halves`}
+                            disabled={!legal}
+                            aria-disabled={legal ? !game.humanToMove : undefined}
+                            data-row={legal ? g : undefined}
+                            data-col={legal ? k : undefined}
+                            aria-label={legal
+                              ? `Split ${n} into ${k} and ${n - k}${same(hintSplit, split) ? ', hint' : ''}`
+                              : `Can't split ${n} into equal halves`}
                             onMouseEnter={() => legal && setHover(split)}
                             onMouseLeave={() => setHover(null)}
                             onFocus={() => legal && setHover(split)}
                             onBlur={() => setHover(null)}
-                            onClick={() => play(split)}
+                            onClick={() => game.humanToMove && play(split)}
                           />
                         );
                       })()}

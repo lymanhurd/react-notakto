@@ -15,7 +15,9 @@ import {
 } from './logic';
 import type { Coins, Move } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
-import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { BalanceTally, BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam, listParam } from '../shared/position';
 import { load, save } from '../shared/storage';
@@ -195,6 +197,16 @@ export default function SilverGame() {
 
   const playAgainRef = usePlayAgainFocus(game.phase);
 
+  const list = (xs: number[]) => xs.length === 1 ? `${xs[0]}` : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
+  const boardText = [
+    `A strip of ${squares} squares; square 1 is next to the star, and coins slide toward it.`,
+    `Coins on squares ${list(coins.map(c => c + 1))}.`,
+    prefs.showGaps ? `Counted gaps: ${list(pairList.map(p => p.gap))}.` : '',
+    selected !== null ? `The coin on square ${selected + 1} is picked up.` : '',
+  ].filter(Boolean).join(' ');
+  const { describe: describeBoard, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describeBoard);
+
   return (
     <div className="silver">
       <header className="game-header">
@@ -277,10 +289,16 @@ export default function SilverGame() {
         </p>
       )}
 
+      <BoardDescription id="silver-board-text" text={boardText} spoken={spoken} onDescribe={describeBoard} />
       <div className={`play-layout${prefs.showGaps && prefs.showTally ? '' : ' no-tally'}`}>
         <div className="play-board silver-board">
           <div className="strip-scroll">
             <div
+              ref={boardRef}
+              role="group"
+              aria-label="Coin strip"
+              aria-describedby="silver-board-text"
+              data-board
               className="strip"
               style={{ gridTemplateColumns: `auto repeat(${squares}, var(--cell))`, '--squares': squares } as React.CSSProperties}
             >
@@ -293,9 +311,11 @@ export default function SilverGame() {
                       <button
                         type="button"
                         className={coinClasses(s)}
-                        disabled={!game.humanToMove}
+                        data-row={0}
+                        data-col={s}
+                        aria-disabled={!game.humanToMove}
                         aria-pressed={s === selected}
-                        aria-label={`Coin on square ${s + 1}${prefs.showGaps ? ` (${role.get(s) === 'leading' ? 'penny: copper, leading' : 'dime: silver, trailing'})` : ''}`}
+                        aria-label={`Coin on square ${s + 1}${prefs.showGaps ? ` (${role.get(s) === 'leading' ? 'penny: copper, leading' : 'dime: silver, trailing'})` : ''}${hintMove?.from === s ? ', hint: move this coin' : ''}`}
                         onClick={() => clickCoin(s)}
                       >
                         <CoinFace kind={coinKind(s)} />
@@ -304,7 +324,9 @@ export default function SilverGame() {
                       <button
                         type="button"
                         className="target-btn"
-                        aria-label={`Slide to square ${s + 1}`}
+                        data-row={0}
+                        data-col={s}
+                        aria-label={`Slide to square ${s + 1}${hintMove && hintMove.from === selected && hintMove.to === s ? ', hint' : ''}`}
                         onMouseEnter={() => setHover(s)}
                         onMouseLeave={() => setHover(null)}
                         onFocus={() => setHover(s)}

@@ -65,12 +65,13 @@
   transition: background 0.12s ease;
 }
 
-.gap-btn:disabled {
+.gap-btn:disabled,
+.gap-btn[aria-disabled="true"] {
   cursor: default;
 }
 
 .gap-btn.preview::after,
-.gap-btn:hover:not(:disabled)::after {
+.gap-btn:hover:not(:disabled):not([aria-disabled="true"])::after {
   background: var(--last);
 }
 

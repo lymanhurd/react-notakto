@@ -20,7 +20,9 @@ import {
   winningMoves,
 } from './logic';
 import type { Bite, Board, Size } from './logic';
-import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
@@ -117,6 +119,13 @@ export default function ChompGame() {
     prompt = 'Your move.';
   }
 
+  const standing = board.map((n, r) => ({ n, r })).filter(({ n }) => n > 0).reverse();
+  const boardText = `${standing.length} ${standing.length === 1 ? 'row' : 'rows'} of chocolate, top to bottom: ${
+    standing.map(({ n, r }) => `row ${r + 1} has ${n} ${squaresWord(n)}`).join(', ')
+  }. The poisoned square is at row 1, column 1 (bottom left).`;
+  const { describe, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describe);
+
   function cell(row: number, col: number) {
     const sq = { row, col };
     if (!hasSquare(board, sq)) return <span key={col} className="ch-cell eaten" aria-hidden="true" />;
@@ -137,13 +146,16 @@ export default function ChompGame() {
         key={col}
         type="button"
         className={classes.join(' ')}
-        disabled={!game.humanToMove}
-        aria-label={`Bite at ${where(sq)}`}
+        data-row={board.length - 1 - row}
+        data-col={col}
+        aria-disabled={!game.humanToMove}
+        aria-label={`Bite at ${where(sq)}: eats ${biteSize(board, sq)} ${squaresWord(biteSize(board, sq))}${
+          hintBite && hintBite.row === row && hintBite.col === col ? ', hint' : ''}`}
         onMouseEnter={() => setHover(sq)}
         onMouseLeave={() => setHover(null)}
         onFocus={() => setHover(sq)}
         onBlur={() => setHover(null)}
-        onClick={() => play(sq)}
+        onClick={() => game.humanToMove && play(sq)}
       />
     );
   }
@@ -252,8 +264,10 @@ export default function ChompGame() {
         </p>
       )}
 
+      <BoardDescription id="chomp-board-text" text={boardText} spoken={spoken} onDescribe={describe} />
       <div className="play-board ch-board-card">
-        <div className="ch-board" role="group" aria-label="Chocolate bar"
+        <div ref={boardRef} className="ch-board" role="group" aria-label="Chocolate bar"
+          aria-describedby="chomp-board-text" data-board
           style={{ '--cols': size.cols } as React.CSSProperties}>
           {rows.map(row => (
             <div key={row} className="ch-row" role="group" aria-label={`Row ${row + 1}`}>

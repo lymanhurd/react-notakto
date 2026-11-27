@@ -96,7 +96,8 @@
   transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 }
 
-.nim-stone:disabled {
+.nim-stone:disabled,
+.nim-stone[aria-disabled="true"] {
   cursor: default;
 }
 

@@ -16,7 +16,10 @@ import {
   winningMoves,
 } from './logic';
 import type { Move, Preset, Rows } from './logic';
-import { BalanceTally, CopyLinkButton, NextSteps } from '../shared/GameParts';
+import { BalanceTally, BoardDescription, CopyLinkButton, NextSteps } from '../shared/GameParts';
+import { useBoardNav } from '../shared/useBoardNav';
+import { useBoardDescription } from '../shared/useBoardDescription';
+import { oddSizes } from '../shared/balance';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
@@ -73,13 +76,16 @@ interface BoardProps {
   hint: Move | null;
   onHover: (move: Move | null) => void;
   onPick: (move: Move) => void;
+  boardRef: React.Ref<HTMLDivElement>;
+  describedBy: string;
 }
 
 function NimBoard({
-  rows, showClusters, interactive, selection, hover, pending, hint, onHover, onPick,
+  rows, showClusters, interactive, selection, hover, pending, hint, onHover, onPick, boardRef, describedBy,
 }: BoardProps) {
   return (
-    <div className={`nim-board${showClusters ? ' show-clusters' : ''}`}>
+    <div ref={boardRef} className={`nim-board${showClusters ? ' show-clusters' : ''}`} data-board
+      role="group" aria-label="Nim board" aria-describedby={describedBy}>
       {rows.map((n, row) => {
         // Lay stones out left to right in greedy clusters (biggest first).
         let idx = 0;
@@ -89,7 +95,7 @@ function NimBoard({
           return { size, start };
         });
         return (
-          <div className="nim-row" key={row}>
+          <div className="nim-row" key={row} role="group" aria-label={`Row ${row + 1}`}>
             <div className="nim-row-label">
               <span className="nim-row-name">Row {row + 1}</span>
               <span className="nim-row-count">
@@ -112,13 +118,20 @@ function NimBoard({
                     else if (inMove(selection, rows, row, i)) classes.push('selected');
                     else if (inMove(hover, rows, row, i)) classes.push('preview');
                     if (inMove(hint, rows, row, i)) classes.push('hint');
+                    const isSelected = selection !== null && selection.row === row && selection.take === take;
+                    const notes = [
+                      isSelected ? 'selected: press again to take' : '',
+                      hint && hint.row === row && hint.take === take ? 'hint' : '',
+                    ].filter(Boolean).join(', ');
                     return (
                       <button
                         key={i}
                         type="button"
                         className={classes.join(' ')}
-                        disabled={!interactive}
-                        aria-label={`Row ${row + 1}: take ${take} ${stonesWord(take)}`}
+                        data-row={row}
+                        data-col={i}
+                        aria-disabled={!interactive}
+                        aria-label={`Row ${row + 1}: take ${take} ${stonesWord(take)}${notes ? ` (${notes})` : ''}`}
                         onMouseEnter={() => onHover({ row, take })}
                         onMouseLeave={() => onHover(null)}
                         onFocus={() => onHover({ row, take })}
@@ -292,6 +305,17 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     prompt = 'Your move. Click a stone to take it and every stone to its right.';
   }
 
+  const boardText = [
+    rows.map((n, r) => `Row ${r + 1}: ${n === 0 ? 'empty' : `${n} ${stonesWord(n)}`}.`).join(' '),
+    prefs.showTally
+      ? oddSizes(rows).length === 0
+        ? 'Tally: balanced.'
+        : `Tally: unbalanced, odd ${oddSizes(rows).map(s => `${s}'s`).join(', ')}.`
+      : '',
+  ].filter(Boolean).join(' ');
+  const { describe, spoken } = useBoardDescription(boardText);
+  const boardRef = useBoardNav(describe);
+
   const playAgainRef = usePlayAgainFocus(phase);
 
   return (
@@ -449,6 +473,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
         </p>
       )}
 
+      <BoardDescription id={`${game}-board-text`} text={boardText} spoken={spoken} onDescribe={describe} />
       <div className={`play-layout${prefs.showTally ? '' : ' no-tally'}`}>
         <NimBoard
           rows={rows}
@@ -460,6 +485,8 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
           hint={hint && hint !== 'balanced' ? hint : null}
           onHover={setHover}
           onPick={pick}
+          boardRef={boardRef}
+          describedBy={`${game}-board-text`}
         />
         {prefs.showTally && (
           <BalanceTally values={rows} sizes={sizes} note={misere

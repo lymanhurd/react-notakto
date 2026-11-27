@@ -485,3 +485,30 @@ a:hover {
   font-size: 0.92rem;
   color: var(--muted);
 }
+
+/* "Describe board" (for screen readers): hidden until tabbed to. */
+.describe-board:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.board-description {
+  margin: 8px 0 0;
+}
+
+/* Focus on a board piece: a dark ring that stands out against the colored pieces. */
+[data-board] [data-row]:focus-visible,
+.play-board [data-row]:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  /* Faded "about to be taken" pieces would fade the ring too. */
+  opacity: 1;
+}

@@ -36,7 +36,7 @@ describe('WythoffGame', () => {
 
   it('moves on the grid and updates the piles, then the computer replies to a P square', () => {
     render(<WythoffGame />)
-    fireEvent.click(screen.getByRole('button', { name: 'Move to (5, 9)' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Move to \(5, 9\)/ }))
     expect(pileCounts()).toEqual(['5', '9'])
     expect(status()).toMatch(/computer will take/)
     act(() => {
@@ -57,7 +57,7 @@ describe('WythoffGame', () => {
     cleanup()
     localStorage.clear()
     render(<WythoffGame />)
-    expect(screen.getAllByRole('button', { name: /from both piles/ })).toHaveLength(7)
+    expect(screen.getAllByRole('button', { name: /^Take \d+ from both piles/ })).toHaveLength(7)
     fireEvent.click(screen.getByRole('button', { name: 'Take 2 from both piles' }))
     expect(marker()).toBe('Marker at (5, 9)')
   })
@@ -73,7 +73,7 @@ describe('WythoffGame', () => {
     render(<WythoffGame />)
     for (let i = 0; i < 7; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer in pile A' }))
     for (let i = 0; i < 9; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer in pile B' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Move to (0, 0)' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Move to \(0, 0\)/ }))
     expect(screen.getByText('You won!')).toBeDefined()
   })
 

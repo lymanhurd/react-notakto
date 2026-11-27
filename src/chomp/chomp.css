@@ -48,7 +48,8 @@
   transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.15s ease;
 }
 
-.ch-cell.square:disabled {
+.ch-cell.square:disabled,
+.ch-cell.square[aria-disabled="true"] {
   cursor: default;
 }
 

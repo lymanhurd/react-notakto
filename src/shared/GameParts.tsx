@@ -229,3 +229,26 @@ export function CopyLinkButton({ values, className = 'btn-theme' }: {
     </span>
   );
 }
+
+/**
+ * The board in words, for screen readers: a hidden summary the board points to
+ * with aria-describedby, a "Describe board" button that appears when tabbed to,
+ * and a live region that speaks the summary on request.
+ */
+export function BoardDescription({ id, text, spoken, onDescribe }: {
+  id: string;
+  text: string;
+  spoken: string;
+  onDescribe: () => void;
+}) {
+  return (
+    <div className="board-description">
+      <p id={id} className="visually-hidden">{text}</p>
+      <button type="button" className="btn-theme describe-board" onClick={onDescribe}
+        aria-keyshortcuts="D">
+        Describe board
+      </button>
+      <p className="visually-hidden" aria-live="polite">{spoken}</p>
+    </div>
+  );
+}

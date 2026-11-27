@@ -12,7 +12,7 @@ if (!rootElement) throw new Error('Failed to find root element');
 createRoot(rootElement).render(
   <StrictMode>
     <div className="page">
-      <a className="back-link" href="/">← Lyman's Logic Games</a>
+      <nav aria-label="Home"><a className="back-link" href="/">← Lyman's Logic Games</a></nav>
       <main id="main">
         <SilverGame />
       </main>
