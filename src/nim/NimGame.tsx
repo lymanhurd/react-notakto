@@ -17,6 +17,7 @@ import {
 } from './logic';
 import type { Move, Preset, Rows } from './logic';
 import { BalanceTally, CopyLinkButton, NextSteps } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { listParam } from '../shared/position';
 import { trackGameEnd, trackGameStart } from '../shared/analytics';
 import { load, save } from '../shared/storage';
@@ -291,6 +292,8 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     prompt = 'Your move. Click a stone to take it and every stone to its right.';
   }
 
+  const playAgainRef = usePlayAgainFocus(phase);
+
   return (
     <div className="nim">
       <header className="game-header">
@@ -376,7 +379,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
           </button>
         )}
         {phase !== 'setup' && (
-          <button
+          <button ref={playAgainRef}
             type="button"
             className={`btn-theme${phase === 'over' ? ' primary' : ''}`}
             onClick={() => chooseBoard(startRows)}

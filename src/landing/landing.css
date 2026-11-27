@@ -4,7 +4,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brand-coral);
+  color: var(--last-text);
 }
 
 .game-list {

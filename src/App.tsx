@@ -5,7 +5,9 @@ const App = () => (
   <div className="page">
     <a className="back-link" href="/">← Lyman's Logic Games</a>
 
-    <Game />
+    <main id="main">
+      <Game />
+    </main>
 
     <SiteFooter />
   </div>

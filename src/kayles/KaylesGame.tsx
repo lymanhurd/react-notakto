@@ -14,6 +14,7 @@ import {
 import type { Knock, Pins } from './logic';
 import { CLUSTER_SIZES } from '../shared/balance';
 import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
@@ -123,6 +124,8 @@ export default function KaylesGame() {
     return classes.join(' ');
   }
 
+  const playAgainRef = usePlayAgainFocus(game.phase);
+
   return (
     <div className="kayles">
       <header className="game-header">
@@ -152,7 +155,7 @@ export default function KaylesGame() {
           </button>
         )}
         {game.phase !== 'setup' && (
-          <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
+          <button ref={playAgainRef} type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
             onClick={() => resize(prefs.size)}>
             {game.phase === 'over' ? 'Play again' : 'Restart'}
           </button>

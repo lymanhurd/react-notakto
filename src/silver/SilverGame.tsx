@@ -16,6 +16,7 @@ import {
 import type { Coins, Move } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam, listParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
@@ -192,6 +193,8 @@ export default function SilverGame() {
     return classes.join(' ');
   }
 
+  const playAgainRef = usePlayAgainFocus(game.phase);
+
   return (
     <div className="silver">
       <header className="game-header">
@@ -229,7 +232,7 @@ export default function SilverGame() {
           </button>
         )}
         {game.phase !== 'setup' && (
-          <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
+          <button ref={playAgainRef} type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
             onClick={playAgain}>
             {game.phase === 'over' ? 'Play again' : fixedStart ? 'Restart' : 'New game'}
           </button>

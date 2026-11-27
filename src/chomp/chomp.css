@@ -62,7 +62,7 @@
   place-items: center;
   background: var(--last-soft);
   border: 2px solid var(--last);
-  color: var(--last);
+  color: var(--last-text);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: calc(var(--cell) * 0.5);

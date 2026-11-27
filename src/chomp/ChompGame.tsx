@@ -21,6 +21,7 @@ import {
 } from './logic';
 import type { Bite, Board, Size } from './logic';
 import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
@@ -150,6 +151,8 @@ export default function ChompGame() {
   const rows = Array.from({ length: board.length }, (_, i) => board.length - 1 - i);
   const cols = Array.from({ length: size.cols }, (_, i) => i);
 
+  const playAgainRef = usePlayAgainFocus(game.phase);
+
   return (
     <div className="chomp">
       <header className="game-header">
@@ -210,7 +213,7 @@ export default function ChompGame() {
           </button>
         )}
         {game.phase !== 'setup' && (
-          <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
+          <button ref={playAgainRef} type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
             onClick={() => restart(size)}>
             {game.phase === 'over' ? 'Play again' : 'Restart'}
           </button>
@@ -250,10 +253,10 @@ export default function ChompGame() {
       )}
 
       <div className="play-board ch-board-card">
-        <div className="ch-board" role="grid" aria-label="Chocolate bar"
+        <div className="ch-board" role="group" aria-label="Chocolate bar"
           style={{ '--cols': size.cols } as React.CSSProperties}>
           {rows.map(row => (
-            <div key={row} className="ch-row" role="row">
+            <div key={row} className="ch-row" role="group" aria-label={`Row ${row + 1}`}>
               {cols.map(col => cell(row, col))}
             </div>
           ))}

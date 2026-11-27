@@ -75,14 +75,14 @@
 
 /* Shown when the player is in a winning position. */
 .game .btn-outline-danger {
-  --bs-btn-color: var(--last);
+  --bs-btn-color: var(--last-text);
   --bs-btn-bg: var(--last-soft);
   --bs-btn-border-color: var(--last);
   --bs-btn-hover-color: var(--on-accent);
-  --bs-btn-hover-bg: var(--last);
+  --bs-btn-hover-bg: var(--last-text);
   --bs-btn-hover-border-color: var(--last);
   --bs-btn-active-color: var(--on-accent);
-  --bs-btn-active-bg: var(--last);
+  --bs-btn-active-bg: var(--last-text);
   --bs-btn-active-border-color: var(--last);
 }
 
@@ -150,7 +150,7 @@ div.boards:not(.dead) canvas {
 
 .last-move {
   font-weight: 600;
-  color: var(--last);
+  color: var(--last-text);
 }
 
 .rules-card .more {

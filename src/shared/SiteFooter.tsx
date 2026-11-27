@@ -31,7 +31,7 @@ const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
         <img src="/images/logo-badge-small.webp" alt="" width="48" height="48" />
         <span>Lyman's Logic Games</span>
       </a>
-      <nav className="footer-links" aria-label="Site">
+      <nav className="footer-links" aria-label="Footer">
         <a href="/#games">Games</a>
         <a href="/daily/">Daily challenge</a>
         <a href="/progress/">Progress</a>

@@ -15,6 +15,7 @@ import {
 } from './logic';
 import type { Pos } from './logic';
 import { CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
@@ -256,6 +257,8 @@ export default function WythoffGame() {
     </div>
   );
 
+  const playAgainRef = usePlayAgainFocus(game.phase);
+
   return (
     <div className="wythoff">
       <header className="game-header">
@@ -291,7 +294,7 @@ export default function WythoffGame() {
           </button>
         )}
         {game.phase !== 'setup' && (
-          <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
+          <button ref={playAgainRef} type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
             onClick={() => restart(prefs.start)}>
             {game.phase === 'over' ? 'Play again' : 'Restart'}
           </button>

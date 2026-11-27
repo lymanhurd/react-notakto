@@ -95,7 +95,7 @@
 }
 
 .clean-star {
-  color: var(--last);
+  color: var(--last-text);
 }
 
 .progress-go {
@@ -111,7 +111,7 @@
 }
 
 .progress-new {
-  color: var(--last);
+  color: var(--last-text);
 }
 
 .progress .rules-card p {

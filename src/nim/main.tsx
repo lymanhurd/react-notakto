@@ -13,7 +13,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <div className="page">
       <a className="back-link" href="/">← Lyman's Logic Games</a>
-      <NimGame />
+      <main id="main">
+        <NimGame />
+      </main>
       <SiteFooter />
     </div>
   </StrictMode>

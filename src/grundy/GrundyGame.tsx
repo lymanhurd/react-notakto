@@ -13,6 +13,7 @@ import {
 import type { Groups, Split } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable } from '../shared/GameParts';
+import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
 import { load, save } from '../shared/storage';
 import { useTurnGame } from '../shared/useTurnGame';
@@ -100,6 +101,8 @@ export default function GrundyGame() {
   // Index of each group's first dot along the row (used as a stable key).
   const starts = groups.map((_, g) => groups.slice(0, g).reduce((a, b) => a + b, 0));
 
+  const playAgainRef = usePlayAgainFocus(game.phase);
+
   return (
     <div className="grundy">
       <header className="game-header">
@@ -129,7 +132,7 @@ export default function GrundyGame() {
           </button>
         )}
         {game.phase !== 'setup' && (
-          <button type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
+          <button ref={playAgainRef} type="button" className={`btn-theme${game.phase === 'over' ? ' primary' : ''}`}
             onClick={() => resize(prefs.size)}>
             {game.phase === 'over' ? 'Play again' : 'Restart'}
           </button>

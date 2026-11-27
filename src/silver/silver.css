@@ -34,7 +34,7 @@
   place-items: center;
   padding-right: 8px;
   font-size: calc(var(--cell) * 0.6);
-  color: var(--last);
+  color: var(--last-text);
 }
 
 .cell {

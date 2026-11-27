@@ -60,6 +60,8 @@
 .wy-grid-card {
   flex: none;
   max-width: 100%;
+  overflow-x: auto; /* on the narrowest phones the grid scrolls inside its card, not the page */
+  box-sizing: border-box;
   padding: 12px;
 }
 
@@ -248,6 +250,9 @@
 
 .wy-piles {
   flex: 1 1 300px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 6px;

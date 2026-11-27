@@ -47,6 +47,7 @@
   --mark: #2b4c9b;        /* X marks */
   --last: #d9481f;        /* coral: most recent move / warning */
   --last-soft: #fde8dd;
+  --last-text: #b23a14;   /* coral dark enough for text (4.5:1 on paper and --last-soft) */
 
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   --font-display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
@@ -79,6 +80,7 @@
     --mark: #93b1ff;
     --last: #ff8a5c;
     --last-soft: #3a2420;
+    --last-text: #ff8a5c;
   }
 }
 
@@ -160,7 +162,8 @@ a:hover {
 
 .footer-links {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 6px 18px;
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -214,7 +217,7 @@ a:hover {
 }
 
 .result-banner.loss strong {
-  color: var(--last);
+  color: var(--last-text);
 }
 
 @keyframes banner-in {

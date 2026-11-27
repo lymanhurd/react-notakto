@@ -50,17 +50,33 @@
   box-shadow: inset 0 0 0 2px var(--border);
 }
 
-/* The small link between two neighboring pins: click it to knock down both. */
+/* The small link between two neighboring pins: click it to knock down both.
+   The button is a 24px target (WCAG 2.5.8); the visible ring is drawn by ::before. */
 .link {
+  position: relative;
   flex: none;
+  width: max(24px, calc(var(--stone) * 0.55));
+  height: max(24px, calc(var(--stone) * 0.55));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.link::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: calc(var(--stone) * 0.55);
   height: calc(var(--stone) * 0.55);
-  margin: 0 3px;
-  padding: 0;
+  box-sizing: border-box;
   border: 2px solid var(--c2);
   border-radius: 50%;
   background: var(--surface);
-  cursor: pointer;
+  transform: translate(-50%, -50%);
   transition: background 0.12s ease, transform 0.12s ease;
 }
 
@@ -68,21 +84,26 @@
   cursor: default;
 }
 
-.link:hover:not(:disabled),
-.link.preview {
+.link:hover:not(:disabled)::before,
+.link.preview::before {
   background: var(--last);
   border-color: var(--last);
-  transform: scale(1.15);
+  transform: translate(-50%, -50%) scale(1.15);
 }
 
-.link.pending {
+.link.pending::before {
   background: var(--last);
   border-color: var(--last);
 }
 
-.link.hint {
+.link.hint::before {
   border-color: var(--accent);
   animation: link-pulse 1.2s ease-in-out infinite;
+}
+
+.link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 0;
 }
 
 @keyframes link-pulse {
@@ -97,10 +118,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .link {
+  .link::before {
     transition: none;
   }
-  .link.hint {
+  .link.hint::before {
     animation: none;
   }
 }
