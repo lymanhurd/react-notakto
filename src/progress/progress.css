@@ -11,6 +11,9 @@
 }
 
 .progress-table-wrap {
+  /* Positioned, so the table's visually hidden text and stretched row links are
+     clipped by this box instead of widening the page on phones. */
+  position: relative;
   overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -126,6 +129,11 @@
   .progress-helpers {
     display: none;
   }
+  /* The whole row is already a link, so the Play column can go on phones. */
+  .progress-table th:last-child,
+  .progress-table td.progress-go {
+    display: none;
+  }
 }
 
 .progress-daily {
@@ -204,4 +212,11 @@
   font-weight: 400;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+@media (max-width: 360px) {
+  .progress-table th,
+  .progress-table td {
+    padding: 8px 4px;
+  }
 }
