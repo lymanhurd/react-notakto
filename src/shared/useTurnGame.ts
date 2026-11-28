@@ -41,6 +41,8 @@ export function useTurnGame<S, M>({
   // Whether the game just finished was won with help (Hint or a helper view).
   const [helpedWin, setHelpedWin] = useState(false);
   const help = useHelpTracker(helpersOn, phase);
+  // The computer made the first move of this game, so a win counts as a second-player win.
+  const computerStarted = useRef(false);
 
   // The latest state, for the computer's delayed move.
   const stateRef = useRef(state);
@@ -52,7 +54,10 @@ export function useTurnGame<S, M>({
 
   function play(who: Player, move: M) {
     // The human's first move from the setup screen starts the game.
-    if (who === 'human' && phase === 'setup') trackGameStart(game, 'human', describeStart(stateRef.current));
+    if (who === 'human' && phase === 'setup') {
+      computerStarted.current = false;
+      trackGameStart(game, 'human', describeStart(stateRef.current));
+    }
     const next = apply(stateRef.current, move);
     stateRef.current = next;
     setState(next);
@@ -63,7 +68,12 @@ export function useTurnGame<S, M>({
       setHelpedWin(who === 'human' && helped);
       trackGameEnd(game, who);
       setStats(s => (who === 'human'
-        ? { ...s, humanWins: s.humanWins + 1, cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1) }
+        ? {
+          ...s,
+          humanWins: s.humanWins + 1,
+          cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1),
+          secondWins: (s.secondWins ?? 0) + (computerStarted.current ? 1 : 0),
+        }
         : { ...s, computerWins: s.computerWins + 1 }));
     } else {
       setPhase('playing');
@@ -107,6 +117,7 @@ export function useTurnGame<S, M>({
     },
     computerFirst() {
       trackGameStart(game, 'computer', describeStart(stateRef.current));
+      computerStarted.current = true;
       setPhase('playing');
       setTurn('computer');
       setPending(computerMove(stateRef.current));
@@ -121,6 +132,7 @@ export function useTurnGame<S, M>({
       setPending(null);
       setLastComputerMove(null);
       setHelpedWin(false);
+      computerStarted.current = false;
       help.reset(helpersOn);
     },
   };

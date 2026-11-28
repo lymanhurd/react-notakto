@@ -46,6 +46,8 @@ export interface GameStats {
   computerWins: number;
   /** Wins without pressing Hint (missing in scores saved before this existed). */
   cleanWins?: number;
+  /** Wins in games where the computer moved first (an even number of boards). */
+  secondWins?: number;
 }
 
 // ─── Per-game state ───────────────────────────────────────────────────────────

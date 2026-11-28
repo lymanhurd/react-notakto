@@ -6,8 +6,10 @@ import {
   dateKey,
   daysBetween,
   EMPTY_RECORD,
+  isWeekend,
   isWin,
   puzzleFor,
+  recount,
   recordReveal,
   recordTry,
   winningMoves,
@@ -55,17 +57,44 @@ describe('puzzles', () => {
 })
 
 describe('streaks', () => {
-  it('builds on consecutive days and lapses after a missed day', () => {
-    let r = recordTry(EMPTY_RECORD, '2026-11-26', true)
-    r = recordTry(r, '2026-11-27', false)
-    r = recordTry(r, '2026-11-27', true)
+  it('builds on consecutive days and lapses after a missed weekday', () => {
+    // November 24, 2026 is a Tuesday.
+    let r = recordTry(EMPTY_RECORD, '2026-11-24', true)
+    r = recordTry(r, '2026-11-25', false)
+    r = recordTry(r, '2026-11-25', true)
     expect(r.streak).toBe(2)
-    expect(r.days['2026-11-27']).toEqual({ tries: 2, solved: true, revealed: false })
-    expect(currentStreak(r, '2026-11-28')).toBe(2)
-    expect(currentStreak(r, '2026-11-29')).toBe(0)
-    r = recordTry(r, '2026-11-29', true)
+    expect(r.days['2026-11-25']).toEqual({ tries: 2, solved: true, revealed: false })
+    expect(currentStreak(r, '2026-11-26')).toBe(2)
+    expect(currentStreak(r, '2026-11-27')).toBe(0)
+    r = recordTry(r, '2026-11-27', true)
     expect(r.streak).toBe(1)
     expect(r.best).toBe(2)
+  })
+
+  it('never breaks a streak over a weekend, but a weekend solve extends it', () => {
+    expect(isWeekend('2026-11-28')).toBe(true)
+    expect(isWeekend('2026-11-30')).toBe(false)
+    // Friday, then Monday: the weekend in between doesn't count.
+    let r = recordTry(EMPTY_RECORD, '2026-11-27', true)
+    expect(currentStreak(r, '2026-11-29')).toBe(1)
+    expect(currentStreak(r, '2026-11-30')).toBe(1)
+    expect(currentStreak(r, '2026-12-01')).toBe(0)
+    r = recordTry(r, '2026-11-30', true)
+    expect(r.streak).toBe(2)
+    // Solving on Saturday adds to the streak.
+    let s = recordTry(EMPTY_RECORD, '2026-11-27', true)
+    s = recordTry(s, '2026-11-28', true)
+    s = recordTry(s, '2026-11-30', true)
+    expect(s.streak).toBe(3)
+  })
+
+  it('recounts streaks saved under the old rules, never lowering them', () => {
+    const days = {
+      '2026-11-27': { tries: 1, solved: true, revealed: false },
+      '2026-11-30': { tries: 1, solved: true, revealed: false },
+    }
+    expect(recount({ days, streak: 1, best: 1, lastSolved: '2026-11-30' })).toMatchObject({ streak: 2, best: 2 })
+    expect(recount({ days, streak: 5, best: 7, lastSolved: '2026-11-30' })).toMatchObject({ streak: 5, best: 7 })
   })
 
   it('ignores tries after solving, and revealing the answer forfeits the day', () => {

@@ -38,6 +38,8 @@ interface Stats {
   computerWins: number;
   /** Wins with no Hint and the clusters and tally switched off. */
   cleanWins?: number;
+  /** Wins in games where the computer moved first. */
+  secondWins?: number;
 }
 
 interface Prefs {
@@ -182,11 +184,16 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
   const helpersOn = prefs.showClusters || prefs.showTally;
   const help = useHelpTracker(helpersOn, phase);
   const [helpedWin, setHelpedWin] = useState(false);
+  // The computer made the first move of this game, so a win counts as a second-player win.
+  const [computerStarted, setComputerStarted] = useState(false);
   useEffect(() => save(PREFS_KEY, prefs), [PREFS_KEY, prefs]);
 
   /** Apply a move for `who`, then hand the turn over or end the game. */
   function play(who: Player, move: Move) {
-    if (who === 'human' && phase === 'setup') trackGameStart(game, 'human', fmt(rows));
+    if (who === 'human' && phase === 'setup') {
+      setComputerStarted(false);
+      trackGameStart(game, 'human', fmt(rows));
+    }
     const next = applyMove(rows, move);
     setRows(next);
     setSelection(null);
@@ -201,7 +208,12 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
       setHelpedWin(won === 'human' && helped);
       trackGameEnd(game, won);
       setStats(s => (won === 'human'
-        ? { ...s, humanWins: s.humanWins + 1, cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1) }
+        ? {
+          ...s,
+          humanWins: s.humanWins + 1,
+          cleanWins: (s.cleanWins ?? 0) + (helped ? 0 : 1),
+          secondWins: (s.secondWins ?? 0) + (computerStarted ? 1 : 0),
+        }
         : { ...s, computerWins: s.computerWins + 1 }));
     } else {
       setPhase('playing');
@@ -254,11 +266,13 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     setPending(null);
     setLastComputerMove(null);
     setHelpedWin(false);
+    setComputerStarted(false);
     help.reset(helpersOn);
   }
 
   function computerFirst() {
     trackGameStart(game, 'computer', fmt(rows));
+    setComputerStarted(true);
     setPhase('playing');
     setTurn('computer');
     setPending(computerMove(rows, Math.random, misere));

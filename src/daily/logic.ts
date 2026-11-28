@@ -2,11 +2,13 @@
  * The Daily Challenge: one "find the winning move" puzzle per day, the same for
  * everyone, built from the date (no server). Puzzles rotate through Nim,
  * Wythoff's Nim and Misère Nim. Solving on consecutive days builds a streak,
- * which is saved in this browser's localStorage only.
+ * which is saved in this browser's localStorage only. Weekends never break a
+ * streak, though solving on a weekend still extends it.
  */
 
 import { isBalanced, isMisereSafe } from '../nim/logic';
 import { isP } from '../wythoff/logic';
+import { load } from '../shared/storage';
 
 export type Kind = 'nim' | 'wythoff' | 'misere';
 
@@ -162,11 +164,53 @@ export interface DailyRecord {
 
 export const EMPTY_RECORD: DailyRecord = { days: {}, streak: 0, best: 0, lastSolved: null };
 
-/** Streak as of `today`: it lapses once a whole day passes without a solve. */
+/** Saturday or Sunday. */
+export function isWeekend(date: string): boolean {
+  const [y, m, d] = date.split('-').map(Number);
+  const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return day === 0 || day === 6;
+}
+
+/**
+ * Does a streak that reached `from` carry on to `to`? Only if every day in between
+ * is a weekend day: weekends never break a streak, but solving on one still adds to it.
+ */
+export function bridges(from: string, to: string): boolean {
+  const gap = daysBetween(from, to);
+  if (gap < 1) return false;
+  for (let i = 1; i < gap; i++) if (!isWeekend(addDays(from, i))) return false;
+  return true;
+}
+
+/** Streak as of `today`: it lapses once a weekday passes without a solve. */
 export function currentStreak(record: DailyRecord, today: string): number {
   if (!record.lastSolved) return 0;
-  const gap = daysBetween(record.lastSolved, today);
-  return gap === 0 || gap === 1 ? record.streak : 0;
+  return record.lastSolved === today || bridges(record.lastSolved, today) ? record.streak : 0;
+}
+
+/**
+ * Work out the streak, best streak and last solved day from the days played.
+ * Neither the streak nor the best ever goes down, so numbers saved under the
+ * older rules (where a weekend broke a streak) are kept.
+ */
+export function recount(record: DailyRecord): DailyRecord {
+  const solved = Object.keys(record.days).filter(d => record.days[d].solved).sort();
+  let streak = 0;
+  let best = record.best;
+  let last: string | null = null;
+  for (const date of solved) {
+    streak = last !== null && bridges(last, date) ? streak + 1 : 1;
+    // Keep the streak that was saved for its last day, if it was longer.
+    if (date === record.lastSolved) streak = Math.max(streak, record.streak);
+    best = Math.max(best, streak);
+    last = date;
+  }
+  return { days: record.days, streak, best, lastSolved: last };
+}
+
+/** The saved record, recounted so streaks follow the current rules. */
+export function loadDaily(): DailyRecord {
+  return recount(load(DAILY_KEY, EMPTY_RECORD));
 }
 
 const dayOf = (record: DailyRecord, date: string): DayResult =>
@@ -177,15 +221,8 @@ export function recordTry(record: DailyRecord, date: string, correct: boolean): 
   const day = dayOf(record, date);
   if (day.solved || day.revealed) return record;
   const next: DayResult = { ...day, tries: day.tries + 1, solved: correct };
-  if (!correct) return { ...record, days: { ...record.days, [date]: next } };
-  const continues = record.lastSolved !== null && daysBetween(record.lastSolved, date) === 1;
-  const streak = continues ? record.streak + 1 : 1;
-  return {
-    days: { ...record.days, [date]: next },
-    streak,
-    best: Math.max(record.best, streak),
-    lastSolved: date,
-  };
+  const days = { ...record.days, [date]: next };
+  return correct ? recount({ ...record, days }) : { ...record, days };
 }
 
 /** The player asked to see the answer: the day no longer counts toward the streak. */

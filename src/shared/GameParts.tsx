@@ -3,6 +3,7 @@ import { oddSizes, tally } from './balance';
 import { NEXT_GAME, nextStepAttrs } from './links';
 import { positionUrl } from './position';
 import { getName, scoreLabel, youWon } from './player';
+import { NewBadges } from './Badges';
 
 export type Player = 'human' | 'computer';
 
@@ -11,6 +12,8 @@ export interface Stats {
   computerWins: number;
   /** Wins with no Hint and no helper views switched on (missing in scores saved before this existed). */
   cleanWins?: number;
+  /** Wins in games where the computer moved first. */
+  secondWins?: number;
 }
 
 export function Scoreboard({ stats }: { stats: Stats }) {
@@ -168,6 +171,7 @@ export function NextSteps({ game, winner, harder, strategyHref, helped }: NextSt
   const next = NEXT_GAME[game];
   return (
     <div className="next-steps">
+      {winner === 'human' && <NewBadges />}
       {winner === 'human' && helped && (
         <p className="next-challenge">
           That win used help. Next challenge: win with Hint unused and the helper views switched off. It counts

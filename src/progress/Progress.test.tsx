@@ -70,7 +70,7 @@ describe('wins without help', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Row \d: take 1 stone$/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Take 1' }))
     expect(screen.getByText(/You won/)).toBeDefined()
-    expect(JSON.parse(localStorage.getItem('nimStats')!)).toEqual({ humanWins: 1, computerWins: 0, cleanWins: 0 })
+    expect(JSON.parse(localStorage.getItem('nimStats')!)).toEqual({ humanWins: 1, computerWins: 0, cleanWins: 0, secondWins: 0 })
   })
 })
 

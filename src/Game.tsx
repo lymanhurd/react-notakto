@@ -621,6 +621,8 @@ export default function Game() {
         ...prev,
         humanWins: prev.humanWins + 1,
         cleanWins: (prev.cleanWins ?? 0) + (helped ? 0 : 1),
+        // With an even number of boards the computer always moves first.
+        secondWins: (prev.secondWins ?? 0) + (humanMovesFirst ? 0 : 1),
       }));
       return;
     }

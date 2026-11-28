@@ -512,3 +512,35 @@ a:hover {
   /* Faded "about to be taken" pieces would fade the ring too. */
   opacity: 1;
 }
+
+/* ---- Badges (see src/shared/Badges.tsx) ---- */
+
+.badge-medal {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.badge-medal.earned {
+  background: var(--brand-gold);
+  border-color: var(--brand-orange);
+  color: var(--brand-navy);
+}
+
+.new-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--brand-gold);
+  border-radius: var(--radius);
+}

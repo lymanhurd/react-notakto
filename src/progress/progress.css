@@ -135,3 +135,73 @@
 .progress-daily a {
   font-weight: 700;
 }
+
+/* Badge shelf */
+.badges {
+  margin-top: 28px;
+}
+
+.badges h3 {
+  margin: 20px 0 10px;
+  font-size: 1.1rem;
+}
+
+.badges h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.badges-summary {
+  margin: 0 0 8px;
+}
+
+.badge-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.badge-item.locked .badge-title {
+  color: var(--muted);
+}
+
+.badge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.badge-how,
+.badge-date {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.badge-games {
+  display: grid;
+  gap: 16px;
+}
+
+.badge-game .badge-list {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.badge-game-count {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

@@ -5,7 +5,6 @@ import {
   dateKey,
   dayResult,
   describeMove,
-  EMPTY_RECORD,
   KIND_INFO,
   puzzleFor,
   recordReveal,
@@ -13,12 +12,14 @@ import {
   winningMoves,
   isWin,
   DAILY_KEY,
+  loadDaily,
 } from './logic';
 import type { DailyMove, DailyRecord } from './logic';
-import { load, save } from '../shared/storage';
+import { save } from '../shared/storage';
 import { track } from '../shared/analytics';
 import { getName } from '../shared/player';
 import { BoardDescription } from '../shared/GameParts';
+import { NewBadges } from '../shared/Badges';
 import { useBoardNav } from '../shared/useBoardNav';
 import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
@@ -39,7 +40,7 @@ function takes(move: DailyMove | null, rows: number[], row: number, i: number): 
 export default function DailyChallenge() {
   const [today] = useState(() => dateKey());
   const [puzzle] = useState(() => puzzleFor(today));
-  const [record, setRecord] = useState<DailyRecord>(() => load(DAILY_KEY, EMPTY_RECORD));
+  const [record, setRecord] = useState<DailyRecord>(loadDaily);
   const [name] = useState(getName);
   const [both, setBoth] = useState(false);
   const [hover, setHover] = useState<DailyMove | null>(null);
@@ -135,14 +136,17 @@ export default function DailyChallenge() {
       </p>
 
       {day.solved ? (
-        <div className="result-banner win" role="status">
-          <strong>Solved{name ? `, ${name}` : ''}!</strong>
-          <span>
-            {day.tries === 1 ? 'First try!' : `In ${day.tries} tries.`}{' '}
-            {streak > 1 ? `That's a ${streak}-day streak.` : 'Your streak has started.'} Come back
-            tomorrow for #{puzzle.number + 1}.
-          </span>
-        </div>
+        <>
+          <div className="result-banner win" role="status">
+            <strong>Solved{name ? `, ${name}` : ''}!</strong>
+            <span>
+              {day.tries === 1 ? 'First try!' : `In ${day.tries} tries.`}{' '}
+              {streak > 1 ? `That's a ${streak}-day streak.` : 'Your streak has started.'} Come back
+              tomorrow for #{puzzle.number + 1}.
+            </span>
+          </div>
+          <NewBadges />
+        </>
       ) : day.revealed ? (
         <div className="result-banner loss" role="status">
           <strong>Answer shown.</strong>
@@ -235,7 +239,7 @@ export default function DailyChallenge() {
         <h2>How the Daily Challenge works</h2>
         <ul className="rules">
           <li>There's one new puzzle every day, the same for everyone. They rotate through Nim, Wythoff's Nim and Misère Nim.</li>
-          <li>Take as many tries as you need. Solve it on consecutive days to build your <strong>streak</strong>; miss a day and it starts over.</li>
+          <li>Take as many tries as you need. Solve it on consecutive days to build your <strong>streak</strong>. Weekends never break a streak, though solving on a weekend adds to it; miss a weekday and it starts over.</li>
           <li>Your streak is saved in this browser only, like your scores.</li>
         </ul>
       </section>

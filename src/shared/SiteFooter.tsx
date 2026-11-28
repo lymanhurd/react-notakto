@@ -1,4 +1,5 @@
 import VersionInfo from './VersionInfo';
+import { useBadgeBaseline } from './useBadgeBaseline';
 import { CONTACT_EMAIL, STORE_URL, contactClickAttrs, storeClickAttrs } from './links';
 
 /** "nim", "silver", … from the current path, for tagging analytics events. */
@@ -10,8 +11,13 @@ function pageName(): string {
  * Footer shared by every page: a note pointing teachers to the worksheet store,
  * the Lyman's Logic Games badge, About/Contact links and build info. The front
  * page has its own, larger store panel, so it passes showStore={false}.
+ *
+ * Every page has this footer, so it is also where badges already earned are noted
+ * when a page opens: a game then announces only the badges its own result earns.
  */
-const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
+const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => {
+  useBadgeBaseline();
+  return (
   <>
     {showStore && (
       <aside className="store-note" aria-label="Classroom worksheets">
@@ -42,6 +48,7 @@ const SiteFooter = ({ showStore = true }: { showStore?: boolean }) => (
       <VersionInfo />
     </footer>
   </>
-);
+  );
+};
 
 export default SiteFooter;

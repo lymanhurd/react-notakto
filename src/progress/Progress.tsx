@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { games } from '../landing/games';
+import { BadgeShelf } from '../shared/Badges';
 import { getName, readRecord } from '../shared/player';
-import { currentStreak, DAILY_KEY, dateKey, EMPTY_RECORD } from '../daily/logic';
-import { load } from '../shared/storage';
+import { currentStreak, dateKey, loadDaily } from '../daily/logic';
 
 /**
  * The player's record in every game on this device: wins, wins without help and
@@ -12,7 +12,7 @@ export default function Progress() {
   const [name] = useState(getName);
   const [rows] = useState(() => games.map(g => ({ game: g, record: readRecord(g.statsKey) })));
   const [daily] = useState(() => {
-    const record = load(DAILY_KEY, EMPTY_RECORD);
+    const record = loadDaily();
     return { streak: currentStreak(record, dateKey()), best: record.best };
   });
 
@@ -85,6 +85,8 @@ export default function Progress() {
           </tbody>
         </table>
       </div>
+
+      <BadgeShelf />
 
       <section className="rules-card">
         <h2>What counts as a win without help?</h2>

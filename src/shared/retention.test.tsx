@@ -104,7 +104,7 @@ describe('progress is kept between visits', () => {
     render(<GrundyGame />)
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: 'Fewer dots' }))
     fireEvent.click(screen.getByRole('button', { name: 'Split 3 into 1 and 2' }))
-    expect(JSON.parse(localStorage.getItem('grundyStats')!)).toEqual({ humanWins: 1, computerWins: 0, cleanWins: 0 })
+    expect(JSON.parse(localStorage.getItem('grundyStats')!)).toEqual({ humanWins: 1, computerWins: 0, cleanWins: 0, secondWins: 0 })
   })
 })
 
