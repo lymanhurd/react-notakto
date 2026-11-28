@@ -22,6 +22,7 @@ import {
 import type { Bite, Board, Size } from './logic';
 import { BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
@@ -153,7 +154,7 @@ export default function ChompGame() {
           hintBite && hintBite.row === row && hintBite.col === col ? ', hint' : ''}`}
         onMouseEnter={() => setHover(sq)}
         onMouseLeave={() => setHover(null)}
-        onFocus={() => setHover(sq)}
+        onFocus={e => keyboardFocus(e.currentTarget) && setHover(sq)}
         onBlur={() => setHover(null)}
         onClick={() => game.humanToMove && play(sq)}
       />

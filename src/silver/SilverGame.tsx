@@ -17,6 +17,7 @@ import type { Coins, Move } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam, listParam } from '../shared/position';
@@ -95,6 +96,7 @@ export default function SilverGame() {
     p.squares = Math.min(MAX_SQUARES, Math.max(p.squares, minSquares(p.coins)));
     setPrefs(p);
     setSelected(null);
+    setHover(null);
     setHint(null);
     setFixedStart(null);
     game.reset(randomCoins(p.coins, p.squares));
@@ -106,6 +108,7 @@ export default function SilverGame() {
       return;
     }
     setSelected(null);
+    setHover(null);
     setHint(null);
     game.reset(fixedStart);
   }
@@ -331,7 +334,7 @@ export default function SilverGame() {
                         aria-label={`Slide to square ${s + 1}${hintMove && hintMove.from === selected && hintMove.to === s ? ', hint' : ''}`}
                         onMouseEnter={() => setHover(s)}
                         onMouseLeave={() => setHover(null)}
-                        onFocus={() => setHover(s)}
+                        onFocus={e => keyboardFocus(e.currentTarget) && setHover(s)}
                         onBlur={() => setHover(null)}
                         onClick={() => moveTo(s)}
                       />

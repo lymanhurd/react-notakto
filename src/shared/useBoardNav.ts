@@ -34,7 +34,12 @@ export function useBoardNav<T extends HTMLElement = HTMLDivElement>(onDescribe?:
     }
     if (!board) return;
     const pieces = items(board);
-    if (pieces.length === 0) return;
+    if (pieces.length === 0) {
+      // The board emptied (game over): there is nothing to keep focus on, so a
+      // later new board must not pull focus back from wherever it went.
+      last.current.active = false;
+      return;
+    }
 
     // Focus was on a piece that is gone: move it to the nearest one.
     const focus = document.activeElement;
@@ -72,6 +77,11 @@ function listen(board: HTMLElement, last: Last, describe: { current?: () => void
     const next = e.relatedTarget as Node | null;
     if (next && !board.contains(next)) last.current.active = false;
   };
+  // Focus arriving anywhere else on the page (e.g. moved to "Play again" after the
+  // focused stone was taken, when no focusout fires) also means it left the board.
+  const onDocFocusIn = (e: FocusEvent) => {
+    if (e.target instanceof Node && !board.contains(e.target)) last.current.active = false;
+  };
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.altKey || e.metaKey) return;
     if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && describe.current) {
@@ -90,7 +100,9 @@ function listen(board: HTMLElement, last: Last, describe: { current?: () => void
   board.addEventListener('focusin', onFocusIn);
   board.addEventListener('focusout', onFocusOut);
   board.addEventListener('keydown', onKeyDown);
+  document.addEventListener('focusin', onDocFocusIn);
   return () => {
+    document.removeEventListener('focusin', onDocFocusIn);
     board.removeEventListener('focusin', onFocusIn);
     board.removeEventListener('focusout', onFocusOut);
     board.removeEventListener('keydown', onKeyDown);

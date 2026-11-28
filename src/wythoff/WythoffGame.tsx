@@ -16,6 +16,7 @@ import {
 import type { Pos } from './logic';
 import { BoardDescription, CopyLinkButton, NextSteps, ResultBanner, Scoreboard } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
@@ -164,7 +165,7 @@ export default function WythoffGame() {
                           aria-label={`Move to ${fmt(p)}: ${describeMove(pos, p)}${notes(p)}`}
                           onMouseEnter={() => setHover(p)}
                           onMouseLeave={() => setHover(null)}
-                          onFocus={() => setHover(p)}
+                          onFocus={e => keyboardFocus(e.currentTarget) && setHover(p)}
                           onBlur={() => setHover(null)}
                           onClick={() => game.humanToMove && play(p)}
                         />
@@ -226,7 +227,7 @@ export default function WythoffGame() {
                 aria-label={`Take ${take} from pile ${label}${notes(to)}`}
                 onMouseEnter={() => setHover(to)}
                 onMouseLeave={() => setHover(null)}
-                onFocus={() => setHover(to)}
+                onFocus={e => keyboardFocus(e.currentTarget) && setHover(to)}
                 onBlur={() => setHover(null)}
                 onClick={() => game.humanToMove && play(to)}
               />
@@ -264,7 +265,7 @@ export default function WythoffGame() {
                 aria-label={`Take ${take} from both piles${notes(to)}`}
                 onMouseEnter={() => setHover(to)}
                 onMouseLeave={() => setHover(null)}
-                onFocus={() => setHover(to)}
+                onFocus={e => keyboardFocus(e.currentTarget) && setHover(to)}
                 onBlur={() => setHover(null)}
                 onClick={() => game.humanToMove && play(to)}
               />

@@ -20,6 +20,7 @@ import { track } from '../shared/analytics';
 import { getName } from '../shared/player';
 import { BoardDescription } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 
 
@@ -196,7 +197,7 @@ export default function DailyChallenge() {
                       takes(answer, puzzle.rows, row, i) && take === answer?.take ? ' (a winning move)' : ''}`}
                     onMouseEnter={() => setHover(move)}
                     onMouseLeave={() => setHover(null)}
-                    onFocus={() => setHover(move)}
+                    onFocus={e => keyboardFocus(e.currentTarget) && setHover(move)}
                     onBlur={() => setHover(null)}
                     onClick={() => tryMove(move)}
                   />

@@ -73,3 +73,30 @@ describe('board keyboard navigation', () => {
     expect(document.activeElement).toBe(screen.getByRole('button', { name: /^Bite at row 3, column 1:/ }))
   })
 })
+
+describe('starting a new game', () => {
+  it('does not grey out stones in a new game after the last stone taken was in focus', () => {
+    window.history.pushState({}, '', '/nim/?rows=1')
+    render(<NimGame />)
+    const stone = screen.getByRole('button', { name: 'Row 1: take 1 stone' })
+    stone.focus()
+    fireEvent.click(stone)
+    fireEvent.click(screen.getByRole('button', { name: /Row 1: take 1 stone \(selected/ }))
+    const again = screen.getByRole('button', { name: 'Play again' })
+    expect(document.activeElement).toBe(again)
+    fireEvent.click(again)
+    expect(board().querySelectorAll('.preview')).toHaveLength(0)
+    expect(board().contains(document.activeElement)).toBe(false)
+  })
+
+  it('does not grey out stones after Restart', () => {
+    render(<NimGame />) // (3, 4, 5)
+    const stone = screen.getByRole('button', { name: 'Row 3: take 1 stone' })
+    stone.focus()
+    fireEvent.click(stone)
+    fireEvent.click(screen.getByRole('button', { name: /Row 3: take 1 stone \(selected/ }))
+    // Safari doesn't move focus to a button on click, so a stone keeps it.
+    fireEvent.click(screen.getByRole('button', { name: 'Restart' }))
+    expect(board().querySelectorAll('.preview')).toHaveLength(0)
+  })
+})

@@ -14,6 +14,7 @@ import type { Groups, Split } from './logic';
 import { CLUSTER_SIZES, isBalanced } from '../shared/balance';
 import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable, BoardDescription } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
@@ -69,6 +70,7 @@ export default function GrundyGame() {
 
   function resize(size: number) {
     setPrefs({ ...prefs, size });
+    setHover(null);
     setHint(null);
     game.reset([size]);
   }
@@ -215,7 +217,7 @@ export default function GrundyGame() {
                               : `Can't split ${n} into equal halves`}
                             onMouseEnter={() => legal && setHover(split)}
                             onMouseLeave={() => setHover(null)}
-                            onFocus={() => legal && setHover(split)}
+                            onFocus={e => keyboardFocus(e.currentTarget) && legal && setHover(split)}
                             onBlur={() => setHover(null)}
                             onClick={() => game.humanToMove && play(split)}
                           />

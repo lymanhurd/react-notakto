@@ -15,6 +15,7 @@ import type { Knock, Pins } from './logic';
 import { CLUSTER_SIZES } from '../shared/balance';
 import { BalanceTally, CopyLinkButton, NextSteps, ResultBanner, Scoreboard, ValueChips, ValueTable, BoardDescription } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
 import { intParam } from '../shared/position';
@@ -89,6 +90,7 @@ export default function KaylesGame() {
 
   function resize(size: number) {
     setPrefs({ ...prefs, size });
+    setHover(null);
     setHint(null);
     game.reset(newPins(size));
   }
@@ -244,7 +246,7 @@ export default function KaylesGame() {
                           aria-label={`Knock down pin ${i + 1}${same(hintKnock, single) ? ', hint' : ''}`}
                           onMouseEnter={() => setHover(single)}
                           onMouseLeave={() => setHover(null)}
-                          onFocus={() => setHover(single)}
+                          onFocus={e => keyboardFocus(e.currentTarget) && setHover(single)}
                           onBlur={() => setHover(null)}
                           onClick={() => game.humanToMove && play(single)}
                         />
@@ -258,7 +260,7 @@ export default function KaylesGame() {
                             aria-label={`Knock down pins ${i + 1} and ${i + 2}${same(hintKnock, pair) ? ', hint' : ''}`}
                             onMouseEnter={() => setHover(pair)}
                             onMouseLeave={() => setHover(null)}
-                            onFocus={() => setHover(pair)}
+                            onFocus={e => keyboardFocus(e.currentTarget) && setHover(pair)}
                             onBlur={() => setHover(null)}
                             onClick={() => game.humanToMove && play(pair)}
                           />

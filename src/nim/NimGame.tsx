@@ -18,6 +18,7 @@ import {
 import type { Move, Preset, Rows } from './logic';
 import { BalanceTally, BoardDescription, CopyLinkButton, NextSteps } from '../shared/GameParts';
 import { useBoardNav } from '../shared/useBoardNav';
+import { keyboardFocus } from '../shared/keyboardFocus';
 import { useBoardDescription } from '../shared/useBoardDescription';
 import { oddSizes } from '../shared/balance';
 import { usePlayAgainFocus } from '../shared/usePlayAgainFocus';
@@ -134,7 +135,7 @@ function NimBoard({
                         aria-label={`Row ${row + 1}: take ${take} ${stonesWord(take)}${notes ? ` (${notes})` : ''}`}
                         onMouseEnter={() => onHover({ row, take })}
                         onMouseLeave={() => onHover(null)}
-                        onFocus={() => onHover({ row, take })}
+                        onFocus={e => keyboardFocus(e.currentTarget) && onHover({ row, take })}
                         onBlur={() => onHover(null)}
                         onClick={() => onPick({ row, take })}
                       />
@@ -248,6 +249,7 @@ export default function NimGame({ misere = false }: { misere?: boolean }) {
     setTurn('human');
     setWinner(null);
     setSelection(null);
+    setHover(null);
     setHint(null);
     setPending(null);
     setLastComputerMove(null);
